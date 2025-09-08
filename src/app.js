@@ -10,8 +10,12 @@ const APP_HOST = env.APP_HOST || 'localhost'
 const APP_PORT = env.APP_PORT || 5000
 
 const START_SERVER = async () => {
-  const app = express()
-  app.use(cors())
+const app = express()
+const cors = require('cors')
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}))
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))

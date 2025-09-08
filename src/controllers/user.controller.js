@@ -9,6 +9,7 @@ const login = async (req, res, next) => {
       status: 'success',
       message: 'Đăng nhập thành công',
       user: userData.user,
+      role: userData.user.role,
       accessToken: userData.accessToken
     })
   } catch (error) {

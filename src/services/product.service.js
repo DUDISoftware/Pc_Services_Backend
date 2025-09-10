@@ -6,49 +6,96 @@ import { deleteImage } from '~/utils/cloudinary.js'
 const createProduct = async (reqBody, files) => {
   const newProductData = {
     ...reqBody,
-    images: files.map(file => ({
+    images: files?.map(file => ({
       url: file.path,
       public_id: file.filename
-    }))
+    })) || []
   }
   const newProduct = new ProductModel(newProductData)
   await newProduct.save()
   return newProduct
 }
 
-
-// Hàm này chưa làm
 const updateProduct = async (id, reqBody, files) => {
-  return { 'message': 'Product updated successfully' }
-  // eslint-disable-next-line no-unreachable
   const updateData = {
     ...reqBody,
-    updated_at: Date.now()
+    updatedAt: Date.now()
   }
 
-  if (files) {
+  if (files && files.length > 0) {
     updateData.images = files.map(file => ({
       url: file.path,
       public_id: file.filename
     }))
   }
+
+  const updated = await ProductModel.findByIdAndUpdate(id, updateData, { new: true })
+  if (!updated) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
+  return updated
 }
 
 const deleteProduct = async (id) => {
   const result = await ProductModel.findByIdAndDelete(id)
-  if (!result) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
-  }
-  // Delete images from cloud storage
+  if (!result) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
+
   if (result.images && result.images.length > 0) {
     await Promise.all(result.images.map(image => deleteImage(image.public_id)))
   }
-  // Return the deleted product data
   return result
+}
+
+// ✅ GET all products (with pagination)
+const getAllProducts = async (page = 1, limit = 10) => {
+  const skip = (page - 1) * limit
+  const products = await ProductModel.find()
+    .populate('category_id', 'name')
+    .skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 })
+
+  const total = await ProductModel.countDocuments()
+  return {
+    status: 'success',
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit),
+    products
+  }
+}
+
+// ✅ GET product by ID
+const getProductById = async (id) => {
+  const product = await ProductModel.findById(id).populate('category_id', 'name')
+  if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
+  return product
+}
+
+// ✅ GET products by Category
+const getProductsByCategory = async (categoryId, page = 1, limit = 10) => {
+  const skip = (page - 1) * limit
+  const products = await ProductModel.find({ category_id: categoryId })
+    .populate('category_id', 'name')
+    .skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 })
+
+  const total = await ProductModel.countDocuments({ category_id: categoryId })
+  return {
+    status: 'success',
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit),
+    products
+  }
 }
 
 export const productService = {
   createProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  getAllProducts,
+  getProductById,
+  getProductsByCategory
 }

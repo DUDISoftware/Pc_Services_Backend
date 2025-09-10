@@ -14,6 +14,36 @@ const createCategory = async (req, res, next) => {
   }
 }
 
+const getCategories = async (req, res, next) => {
+  try {
+    let { page = 1, limit = 10 } = req.query
+    page = parseInt(page)
+    limit = parseInt(limit)
+
+    const data = await categoryService.getCategories(page, limit)
+
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      ...data // { page, limit, total, totalPages, categories }
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const getCategoryById = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const category = await categoryService.getCategoryById(id)
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      category
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 const updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -43,6 +73,8 @@ const deleteCategory = async (req, res, next) => {
 
 export const categoryController = {
   createCategory,
+  getCategories,
+  getCategoryById,
   updateCategory,
   deleteCategory
 }

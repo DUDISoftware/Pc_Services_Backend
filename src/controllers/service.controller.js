@@ -3,11 +3,11 @@ import { serviceService } from '~/services/customerService.service'
 
 const createService = async (req, res, next) => {
   try {
-    const Service = await serviceService.createService(req.body)
+    const service = await serviceService.createService(req.body)
     res.status(StatusCodes.CREATED).json({
       status: 'success',
       message: 'Tạo dịch vụ thành công',
-      Service
+      service
     })
   } catch (error) {
     next(error)
@@ -17,11 +17,11 @@ const createService = async (req, res, next) => {
 const updateService = async (req, res, next) => {
   try {
     const { id } = req.params
-    const updatedService = await serviceService.updateService(id, req.body)
+    const updated = await serviceService.updateService(id, req.body)
     res.status(StatusCodes.OK).json({
       status: 'success',
       message: 'Cập nhật dịch vụ thành công',
-      Service: updatedService
+      service: updated
     })
   } catch (error) {
     next(error)
@@ -41,8 +41,43 @@ const hideService = async (req, res, next) => {
   }
 }
 
+const getAllServices = async (req, res, next) => {
+  try {
+    const services = await serviceService.getAllServices()
+    res.status(StatusCodes.OK).json({ status: 'success', services })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const getServiceById = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const service = await serviceService.getServiceById(id)
+    res.status(StatusCodes.OK).json({ status: 'success', service })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const deleteService = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    await serviceService.deleteService(id)
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'Xóa dịch vụ thành công'
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const serviceController = {
   createService,
   updateService,
-  hideService
+  hideService,
+  getAllServices,
+  getServiceById,
+  deleteService
 }

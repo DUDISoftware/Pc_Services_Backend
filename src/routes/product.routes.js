@@ -13,7 +13,11 @@ Router.delete('/:id', verifyToken, verifyAdmin, productValidation.deleteProduct,
 
 // ✅ GET APIs
 Router.get('/', productController.getAllProducts) // ?page=1&limit=10
+// product.route.js
+Router.get('/featured', productController.getFeaturedProducts);
 Router.get('/:id', productController.getProductById)
+// product.route.js
+Router.get('/:id/related', productController.getRelatedProducts);
 Router.get('/category/:categoryId', productController.getProductsByCategory)
 
 export const productRoute = Router

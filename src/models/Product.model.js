@@ -48,6 +48,10 @@ const productSchema = new mongoose.Schema({
     type: String,
     enum: ['available', 'out_of_stock', 'hidden'],
     default: 'available'
+  },
+  is_featured: {
+    type: Boolean,
+    default: false
   }
 }, schemaOptions)
 

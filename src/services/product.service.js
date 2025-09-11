@@ -63,6 +63,28 @@ const getAllProducts = async (page = 1, limit = 10) => {
     products
   }
 }
+const getFeaturedProducts = async (limit = 8) => {
+  return await ProductModel.find({ is_featured: true, status: 'available' })
+    .limit(limit)
+    .sort({ createdAt: -1 });
+}
+// product.service.js
+const getRelatedProducts = async (productId, limit = 4) => {
+  // lấy product hiện tại để biết category
+  const product = await ProductModel.findById(productId);
+  if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
+
+  // tìm sản phẩm cùng category, khác id hiện tại
+  const related = await ProductModel.find({
+    category_id: product.category_id,
+    _id: { $ne: productId },
+    status: 'available'
+  })
+    .limit(limit)
+    .sort({ createdAt: -1 });
+
+  return related;
+};
 
 // ✅ GET product by ID
 const getProductById = async (id) => {
@@ -97,5 +119,7 @@ export const productService = {
   deleteProduct,
   getAllProducts,
   getProductById,
-  getProductsByCategory
-}
+  getProductsByCategory,
+  getFeaturedProducts,
+  getRelatedProducts
+};

@@ -20,7 +20,17 @@ const createProduct = async (req, res, next) => {
     next(error)
   }
 }
-
+// product.controller.js
+const getRelatedProducts = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { limit = 4 } = req.query;
+    const products = await productService.getRelatedProducts(id, Number(limit));
+    res.status(StatusCodes.OK).json({ status: 'success', products });
+  } catch (error) {
+    next(error);
+  }
+};
 const updateProduct = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -48,6 +58,16 @@ const deleteProduct = async (req, res, next) => {
     next(error)
   }
 }
+// product.controller.js
+const getFeaturedProducts = async (req, res, next) => {
+  try {
+    const { limit = 8 } = req.query;
+    const products = await productService.getFeaturedProducts(Number(limit));
+    res.status(StatusCodes.OK).json({ status: 'success', products });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // ✅ GET all products
 const getAllProducts = async (req, res, next) => {
@@ -89,5 +109,7 @@ export const productController = {
   deleteProduct,
   getAllProducts,
   getProductById,
-  getProductsByCategory
+  getProductsByCategory,
+  getFeaturedProducts,
+  getRelatedProducts
 }

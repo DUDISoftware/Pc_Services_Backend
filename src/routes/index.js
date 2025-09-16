@@ -5,7 +5,7 @@ import { productRoute } from './product.routes.js'
 import { categoryRoute } from './category.routes.js'
 import { userRoute } from './user.routes.js'
 import { serviceRoute } from './service.routes.js'
-
+import { serviceCategoryRoute } from './serviceCategory.routes.js'
 const Router = express.Router()
 
 Router.get('/status', (req, res) => {
@@ -19,5 +19,5 @@ Router.use('/banners', bannerRoute)
 Router.use('/products', productRoute)
 Router.use('/categories', categoryRoute)
 Router.use('/services', serviceRoute)
-
+Router.use('/service-categories', serviceCategoryRoute)
 export const APIs = Router

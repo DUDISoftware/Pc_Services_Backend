@@ -7,6 +7,7 @@ const Router = express.Router()
 
 // Public routes (không cần token)
 Router.get('/', serviceController.getAllServices)
+Router.get('/search', serviceController.searchServices)
 Router.get('/:id', serviceController.getServiceById)
 
 // Admin routes (cần token)

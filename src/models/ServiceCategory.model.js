@@ -12,6 +12,7 @@ const serviceCategorySchema = new mongoose.Schema(
   {
     name: {
       type: String,
+      index: true,
       required: true,
       trim: true,
       maxlength: 200

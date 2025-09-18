@@ -19,7 +19,8 @@ const createProduct = async (req, res, next) => {
     quantity: Joi.number().required().min(0),
     category_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
     brand: Joi.string().required().max(100).trim(),
-    status: Joi.string().valid('available', 'out_of_stock', 'hidden').default('available')
+    status: Joi.string().valid('available', 'out_of_stock', 'hidden').default('available'),
+    tags: Joi.array().items(Joi.string().max(200).trim()).optional()
   })
 
   try {

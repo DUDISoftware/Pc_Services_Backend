@@ -11,22 +11,23 @@ const schemaOptions = {
 const categorySchema = new mongoose.Schema({
   name: {
     type: String,
+    index: true,
     required: true,
     trim: true,
     maxlength: 100
+  },
+  tags: {
+    type: [String],
+    default: [],
+    index: true,
+    trim: true,
+    maxlength: 200,
+    required: false
   },
   description: {
     type: String,
     required: true,
     trim: true
-  },
-  created_at: {
-    type: Date,
-    default: Date.now
-  },
-  updated_at: {
-    type: Date,
-    default: Date.now
   }
 }, schemaOptions)
 

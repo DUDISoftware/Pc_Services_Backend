@@ -7,6 +7,7 @@ const Router = express.Router();
 
 // Public
 Router.get('/', serviceCategoryController.getAllCategories);
+Router.get('/search', serviceCategoryController.searchCategories);
 Router.get('/:id', serviceCategoryController.getCategoryById);
 
 // Admin

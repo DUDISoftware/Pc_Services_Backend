@@ -11,9 +11,53 @@ const schemaOptions = {
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
+    index: true,
     required: true,
     trim: true,
     maxlength: 200
+  },
+  tags: {
+    type: [String],
+    default: [],
+    index: true,
+    trim: true,
+    maxlength: 200,
+    required: false
+  },
+  ports: {
+    type: [String],
+    default: [],
+    trim: true,
+    maxLength: 50,
+    required: false
+  },
+  panel: {
+    type: String,
+    default: '',
+    trim: true,
+    maxLength: 100,
+    required: false
+  },
+  resolution: {
+    type: String,
+    default: '',
+    trim: true,
+    maxLength: 50,
+    required: false
+  },
+  size: {
+    type: String,
+    default: '',
+    trim: true,
+    maxLength: 50,
+    required: false
+  },
+  model: {
+    type: String,
+    default: '',
+    trim: true,
+    maxLength: 100,
+    required: false
   },
   description: {
     type: String,

@@ -1,5 +1,6 @@
 import { StatusCodes } from 'http-status-codes'
 import { categoryService } from '~/services/category.service'
+import { searchCategories as searchService } from '~/services/search.service'
 
 const createCategory = async (req, res, next) => {
   try {
@@ -71,10 +72,36 @@ const deleteCategory = async (req, res, next) => {
   }
 }
 
+const searchCategories = async (req, res, next) => {
+  try {
+    const { query } = req.query
+    if (!query || query.trim() === '') {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        status: 'fail',
+        message: 'Query parameter is required'
+      })
+    }
+    let { page = 1, limit = 10 } = req.query
+    page = parseInt(page)
+    limit = parseInt(limit)
+    const categories = await searchService(query, page, limit)
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      page,
+      limit,
+      results: categories.length,
+      categories
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const categoryController = {
   createCategory,
   getCategories,
   getCategoryById,
   updateCategory,
-  deleteCategory
+  deleteCategory,
+  searchCategories
 }

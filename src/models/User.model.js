@@ -12,6 +12,7 @@ const schemaOptions = {
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
+    index: true,
     required: true,
     unique: true,
     trim: true
@@ -30,14 +31,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['active', 'locked'],
     default: 'active'
-  },
-  created_at: {
-    type: Date,
-    default: Date.now
-  },
-  updated_at: {
-    type: Date,
-    default: Date.now
   }
 }, schemaOptions)
 

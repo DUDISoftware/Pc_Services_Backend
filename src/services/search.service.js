@@ -2,7 +2,10 @@ import ProductModel from '~/models/Product.model'
 import CategoryModel from '~/models/Category.model'
 import ServiceModel from '~/models/Service.model'
 import ServiceCategoryModel from '~/models/ServiceCategory.model'
-import UserModel from '~/models/User.model'
+import Repair from '~/models/RepairRequest.model.js'
+import Order from '~/models/OrderRequest.model.js'
+// import UserModel from '~/models/User.model'
+
 import { redisClient } from '~/config/redis.js'
 
 async function searchInRedis(type, query) {
@@ -97,23 +100,47 @@ const searchServiceCategories = async (query, page = 1, limit = 10) => {
   return categories
 }
 
-const searchUsers = async (query, page = 1, limit = 10) => {
-  const skip = (page - 1) * limit
-  const cachedResults = await searchInRedis('users', query);
-  if (cachedResults) {
-    return cachedResults;
-  }
+// const searchUsers = async (query, page = 1, limit = 10) => {
+//   const skip = (page - 1) * limit
+//   const cachedResults = await searchInRedis('users', query);
+//   if (cachedResults) {
+//     return cachedResults;
+//   }
 
+//   const regex = new RegExp(`.*${query}.*`, 'i')
+//   const users = await UserModel.find({
+//     $or: [
+//       { name: regex },
+//       { email: regex },
+//       { phone: regex }
+//     ]
+//   }).skip(skip).limit(limit)
+//   await cacheInRedis('users', query, users);
+//   return users
+// }
+
+const searchRequests = async (query, page = 1, limit = 10) => {
+  const skip = (page - 1) * limit
   const regex = new RegExp(`.*${query}.*`, 'i')
-  const users = await UserModel.find({
+  const repair = await Repair.find({
     $or: [
       { name: regex },
       { email: regex },
-      { phone: regex }
+      { phone: regex },
+      { address: regex }
     ]
   }).skip(skip).limit(limit)
-  await cacheInRedis('users', query, users);
-  return users
+
+  const order = await Order.find({
+    $or: [
+      { name: regex },
+      { email: regex },
+      { phone: regex },
+      { address: regex }
+    ]
+  }).skip(skip).limit(limit)
+
+  return { repair, order }
 }
 
-export { searchProducts, searchCategories, searchServices, searchServiceCategories }
+export { searchProducts, searchCategories, searchServices, searchServiceCategories, searchRequests }

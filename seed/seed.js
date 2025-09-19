@@ -6,20 +6,23 @@ import ProductModel from '../src/models/Product.model.js';
 import ServiceModel from '../src/models/Service.model.js';
 import BannerModel from '../src/models/Banner.model.js';
 import UserModel from '../src/models/User.model.js';
+import OrderRequestModel from '../src/models/OrderRequest.model.js';
+import RepairRequestModel from '../src/models/RepairRequest.model.js';
+import RatingModel from '../src/models/Rating.model.js';
+import ContactModel from '../src/models/Contact.model.js';
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
 
 dotenv.config({ path: '.env.example' });
 
 const connectDB = async () => {
-  console.log(process.env.MONGODB_URI);
   await mongoose.connect(process.env.MONGODB_URI);
   console.log('✅ Connected to MongoDB');
 };
 
 const seed = async () => {
   await connectDB();
-  // Xoá toàn bộ dữ liệu cũ
+
   await Promise.all([
     CategoryModel.deleteMany(),
     ServiceCategoryModel.deleteMany(),
@@ -27,10 +30,12 @@ const seed = async () => {
     ServiceModel.deleteMany(),
     BannerModel.deleteMany(),
     UserModel.deleteMany(),
+    OrderRequestModel.deleteMany(),
+    RepairRequestModel.deleteMany(),
+    RatingModel.deleteMany(),
+    ContactModel.deleteMany(),
   ]);
 
-
-  // 1. Seed categories
   const categoryDocs = await CategoryModel.insertMany(
     [...Array(10)].map(() => ({
       name: faker.commerce.department(),
@@ -38,7 +43,6 @@ const seed = async () => {
     }))
   );
 
-  // 2. Seed service categories
   const serviceCategoryDocs = await ServiceCategoryModel.insertMany(
     [...Array(10)].map(() => ({
       name: faker.company.name(),
@@ -47,7 +51,6 @@ const seed = async () => {
     }))
   );
 
-  // 3. Seed products (cần category_id thật)
   const productDocs = await ProductModel.insertMany(
     [...Array(20)].map(() => ({
       name: faker.commerce.productName(),
@@ -68,7 +71,6 @@ const seed = async () => {
     }))
   );
 
-  // 4. Seed services (cần serviceCategory_id thật)
   const serviceDocs = await ServiceModel.insertMany(
     [...Array(20)].map(() => ({
       name: faker.company.catchPhrase(),
@@ -78,11 +80,11 @@ const seed = async () => {
       estimated_time: `${faker.number.int({ min: 30, max: 120 })} minutes`,
       status: faker.helpers.arrayElement(['active', 'inactive', 'hidden']),
       category: faker.helpers.arrayElement(serviceCategoryDocs)._id,
+      image: [faker.image.url()]
     }))
   );
 
-  // 5. Seed banners
-  const bannerDocs = await BannerModel.insertMany(
+  await BannerModel.insertMany(
     [...Array(10)].map(() => ({
       title: faker.company.catchPhrase(),
       description: faker.lorem.sentence(),
@@ -91,14 +93,63 @@ const seed = async () => {
     }))
   );
 
-  // 6. Seed users (mật khẩu sẽ được mã hóa tự động nhờ pre-save hook)
-  const salt = await bcrypt.genSalt(10)
+  const salt = await bcrypt.genSalt(10);
   const userDocs = await UserModel.insertMany(
     [...Array(10)].map(() => ({
       username: faker.internet.username(),
       password: bcrypt.hashSync('password123', salt),
       role: faker.helpers.arrayElement(['admin', 'staff']),
       status: faker.helpers.arrayElement(['active', 'locked']),
+    }))
+  );
+
+  await OrderRequestModel.insertMany(
+    [...Array(15)].map(() => ({
+      items: [{
+        product_id: faker.helpers.arrayElement(productDocs)._id,
+        quantity: faker.number.int({ min: 1, max: 3 })
+      }],
+      name: faker.person.fullName(),
+      phone: faker.helpers.replaceSymbols('0## ### ####'),
+      email: faker.internet.email(),
+      note: faker.lorem.sentence(),
+      status: faker.helpers.arrayElement(['new', 'in_progress', 'completed', 'cancelled']),
+      hidden: faker.datatype.boolean()
+    }))
+  );
+
+  await RepairRequestModel.insertMany(
+    [...Array(15)].map(() => ({
+      service_id: faker.helpers.arrayElement(serviceDocs)._id,
+      name: faker.person.fullName(),
+      phone: faker.helpers.replaceSymbols('0## ### ####'),
+      email: faker.internet.email(),
+      address: faker.location.streetAddress(),
+      repair_type: faker.helpers.arrayElement(['at_home', 'at_store']),
+      problem_description: faker.lorem.sentences(2),
+      note: faker.lorem.sentence(),
+      status: faker.helpers.arrayElement(['new', 'in_progress', 'completed', 'cancelled']),
+      hidden: faker.datatype.boolean()
+    }))
+  );
+
+  await RatingModel.insertMany(
+    [...Array(20)].map(() => ({
+      name: faker.person.fullName(),
+      score: faker.number.int({ min: 1, max: 5 }),
+      comment: faker.lorem.sentences(2),
+      product_id: faker.helpers.arrayElement(productDocs)._id,
+      service_id: faker.helpers.arrayElement(serviceDocs)._id
+    }))
+  );
+
+  await ContactModel.insertMany(
+    [...Array(10)].map(() => ({
+      name: faker.person.fullName(),
+      email: faker.internet.email(),
+      phone: faker.helpers.replaceSymbols('0## ### ####'),
+      address: faker.location.streetAddress(),
+      map_link: faker.internet.url()
     }))
   );
 

@@ -11,7 +11,6 @@ const schemaOptions = {
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
-    index: true,
     required: true,
     trim: true,
     maxlength: 200
@@ -19,7 +18,6 @@ const productSchema = new mongoose.Schema({
   tags: {
     type: [String],
     default: [],
-    index: true,
     trim: true,
     maxlength: 200,
     required: false
@@ -97,8 +95,15 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   }
+}, {
+  collection: 'products'
 }, schemaOptions)
 
+productSchema.index({
+  name: 'text',
+  tags: 'text',
+  brand: 'text'
+})
 
 const ProductModel = mongoose.model('products', productSchema)
 

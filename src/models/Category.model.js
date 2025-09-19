@@ -29,8 +29,14 @@ const categorySchema = new mongoose.Schema({
     required: true,
     trim: true
   }
+}, {
+  collection: 'categories'
 }, schemaOptions)
 
+categorySchema.index({
+  name: 'text',
+  tags: 'text'
+});
 
 const CategoryModel = mongoose.model('categories', categorySchema)
 

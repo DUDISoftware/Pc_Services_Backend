@@ -27,8 +27,17 @@ const serviceCategorySchema = new mongoose.Schema(
       default: 'active'
     }
   },
+  {
+    collection: 'service_categories'
+  },
   schemaOptions
 )
+
+serviceCategorySchema.index({
+  name: 'text',
+  description: 'text'
+});
+
 const ServiceCategoryModel = mongoose.model(
   'service_categories',
   serviceCategorySchema

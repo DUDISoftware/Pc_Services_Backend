@@ -32,7 +32,11 @@ const userSchema = new mongoose.Schema({
     enum: ['active', 'locked'],
     default: 'active'
   }
-}, schemaOptions)
+},
+{
+  collection: 'users'
+}, schemaOptions
+)
 
 userSchema.pre('save', async function (next) {
   if (this.isModified('password')) {

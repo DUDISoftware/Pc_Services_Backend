@@ -24,6 +24,14 @@ const categorySchema = new mongoose.Schema({
     maxlength: 200,
     required: false
   },
+  slug:{
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 200,
+    unique: true,
+    index: true
+  },
   description: {
     type: String,
     required: true,
@@ -35,7 +43,8 @@ const categorySchema = new mongoose.Schema({
 
 categorySchema.index({
   name: 'text',
-  tags: 'text'
+  tags: 'text',
+  slug: 'text',
 });
 
 const CategoryModel = mongoose.model('categories', categorySchema)

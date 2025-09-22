@@ -8,19 +8,19 @@ const createService = async (reqBody) => {
     category
   })
   await service.save()
-  return service.populate('category', 'name')
+  return service.populate('category_id', 'name')
 }
 
 const updateService = async (id, reqBody) => {
-  const { category, ...rest } = reqBody
+  const { category_id, ...rest } = reqBody
   const updateData = {
     ...rest,
-    ...(category && { category }),
+    ...(category_id && { category_id }),
     updated_at: Date.now(),
   }
   const service = await ServiceModel.findByIdAndUpdate(id, updateData, {
     new: true,
-  }).populate('category', 'name')
+  }).populate('category_id', 'name')
   if (!service) throw new ApiError(StatusCodes.NOT_FOUND, 'Service not found')
   return service
 }
@@ -36,13 +36,22 @@ const hideService = async (id) => {
 // src/services/customerService.service.js
 const getAllServices = async (filter = {}) => {
   return await ServiceModel.find(filter)
-    .populate('category', 'name description status') // ✅ lấy thêm thông tin category
+    .populate('category_id', 'name description status') // ✅ lấy thêm thông tin category
     .sort({ created_at: -1 })
 }
 
 const getServiceById = async (id) => {
   const service = await ServiceModel.findById(id).populate(
-    'category',
+    'category_id',
+    'name description status'
+  )
+  if (!service) throw new ApiError(StatusCodes.NOT_FOUND, 'Service not found')
+  return service
+}
+
+const getServiceBySlug = async (slug) => {
+  const service = await ServiceModel.findOne({ slug }).populate(
+    'category_id',
     'name description status'
   )
   if (!service) throw new ApiError(StatusCodes.NOT_FOUND, 'Service not found')
@@ -59,6 +68,7 @@ export const serviceService = {
   createService,
   updateService,
   hideService,
+  getServiceBySlug,
   getAllServices,
   getServiceById,
   deleteService

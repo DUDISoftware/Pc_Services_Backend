@@ -9,6 +9,7 @@ const Router = express.Router();
 Router.get('/', serviceCategoryController.getAllCategories);
 Router.get('/search', serviceCategoryController.searchCategories);
 Router.get('/:id', serviceCategoryController.getCategoryById);
+Router.get('/slug/:slug', serviceCategoryController.getCategoryBySlug);
 
 // Admin
 Router.post('/', verifyToken, serviceCategoryController.createCategory);

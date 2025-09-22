@@ -61,6 +61,16 @@ const getServiceById = async (req, res, next) => {
   }
 }
 
+const getServiceBySlug = async (req, res, next) => {
+  try {
+    const { slug } = req.params
+    const service = await serviceService.getServiceBySlug(slug)
+    res.status(StatusCodes.OK).json({ status: 'success', service })
+  } catch (error) {
+    next(error)
+  }
+}
+
 const deleteService = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -100,6 +110,7 @@ export const serviceController = {
   hideService,
   getAllServices,
   getServiceById,
+  getServiceBySlug,
   deleteService,
   searchServices
 }

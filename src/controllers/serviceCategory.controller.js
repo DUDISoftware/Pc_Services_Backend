@@ -50,6 +50,15 @@ const getCategoryById = async (req, res, next) => {
   }
 };
 
+const getCategoryBySlug = async (req, res, next) => {
+  try {
+    const category = await serviceCategoryService.getCategoryBySlug(req.params.slug);
+    res.status(StatusCodes.OK).json({ status: 'success', category });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const deleteCategory = async (req, res, next) => {
   try {
     await serviceCategoryService.deleteCategory(req.params.id);
@@ -88,6 +97,7 @@ export const serviceCategoryController = {
   updateCategory,
   getAllCategories,
   getCategoryById,
+  getCategoryBySlug,
   deleteCategory,
   searchCategories
 };

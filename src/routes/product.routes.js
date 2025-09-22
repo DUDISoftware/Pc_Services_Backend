@@ -16,6 +16,7 @@ Router.get('/', productController.getAllProducts) // ?page=1&limit=10
 // product.route.js
 Router.get('/featured', productController.getFeaturedProducts);
 Router.get('/search', productController.searchProducts) // ?query=abc&page=1&limit=10
+Router.get('/slug/:slug', productValidation.getProductBySlug, productController.getProductBySlug);
 Router.get('/:id', productController.getProductById)
 // product.route.js
 Router.get('/:id/related', productController.getRelatedProducts);

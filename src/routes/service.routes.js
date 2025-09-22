@@ -9,6 +9,7 @@ const Router = express.Router()
 Router.get('/', serviceController.getAllServices)
 Router.get('/search', serviceController.searchServices)
 Router.get('/:id', serviceController.getServiceById)
+Router.get('/slug/:slug', serviceValidation.getServiceBySlug, serviceController.getServiceBySlug)
 
 // Admin routes (cần token)
 Router.post('/', verifyToken, serviceValidation.createService, serviceController.createService)

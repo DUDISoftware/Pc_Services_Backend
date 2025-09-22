@@ -104,6 +104,16 @@ const getProductsByCategory = async (req, res, next) => {
   }
 }
 
+const getProductBySlug = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+    const product = await productService.getProductBySlug(slug);
+    res.status(StatusCodes.OK).json({ status: 'success', product });
+  } catch (error) {
+    next(error);
+  }
+}
+
 const searchProducts = async (req, res, next) => {
   try {
     const { query, page = 1, limit = 10 } = req.query;
@@ -134,6 +144,7 @@ export const productController = {
   getAllProducts,
   getProductById,
   getProductsByCategory,
+  getProductBySlug,
   getFeaturedProducts,
   getRelatedProducts,
   searchProducts

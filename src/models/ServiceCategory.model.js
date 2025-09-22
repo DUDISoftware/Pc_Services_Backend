@@ -17,6 +17,14 @@ const serviceCategorySchema = new mongoose.Schema(
       trim: true,
       maxlength: 200
     },
+    slug:{
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 200,
+      unique: true,
+      index: true
+    },
     description: {
       type: String,
       trim: true

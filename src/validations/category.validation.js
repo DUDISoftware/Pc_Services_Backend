@@ -67,9 +67,21 @@ const getCategoryById = async (req, res, next) => {
   }
 }
 
+const getCategoryBySlug = async (req, res, next) => {
+  try {
+    const params = req?.params ? req.params : {}
+    const validatedParams = await idValidationRule.validateAsync(params, { abortEarly: false })
+    req.params = validatedParams
+    next()
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
+  }
+}
+
 export const categoryValidation = {
   createCategory,
   updateCategory,
   deleteCategory,
+  getCategoryBySlug,
   getCategoryById
 }

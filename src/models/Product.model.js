@@ -22,6 +22,14 @@ const productSchema = new mongoose.Schema({
     maxlength: 200,
     required: false
   },
+  slug:{
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 200,
+    unique: true,
+    index: true
+  },
   ports: {
     type: [String],
     default: [],

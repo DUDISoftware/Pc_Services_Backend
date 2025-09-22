@@ -113,6 +113,12 @@ const getProductsByCategory = async (categoryId, page = 1, limit = 10) => {
   }
 }
 
+const getProductBySlug = async (slug) => {
+  const product = await ProductModel.findOne({ slug }).populate('slug', 'name');
+  if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
+  return product;
+}
+
 export const productService = {
   createProduct,
   updateProduct,
@@ -121,5 +127,6 @@ export const productService = {
   getProductById,
   getProductsByCategory,
   getFeaturedProducts,
-  getRelatedProducts
+  getRelatedProducts,
+  getProductBySlug
 };

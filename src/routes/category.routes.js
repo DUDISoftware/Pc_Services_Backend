@@ -10,6 +10,7 @@ Router.post('/', verifyToken, verifyAdmin, categoryValidation.createCategory, ca
 Router.get('/', categoryController.getCategories)
 Router.get('/search', categoryController.searchCategories)
 Router.get('/:id', categoryValidation.getCategoryById, categoryController.getCategoryById)
+Router.get('/slug/:slug', categoryValidation.getCategoryBySlug, categoryController.getCategoryBySlug)
 Router.put('/:id', verifyToken, verifyAdmin, categoryValidation.updateCategory, categoryController.updateCategory)
 Router.delete('/:id', verifyToken, verifyAdmin, categoryValidation.deleteCategory, categoryController.deleteCategory)
 

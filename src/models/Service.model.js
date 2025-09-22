@@ -18,6 +18,14 @@ const serviceSchema = new mongoose.Schema(
       trim: true,
       maxlength: 200
     },
+    slug:{
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 200,
+      unique: true,
+      index: true
+    },
     description: {
       type: String,
       index: true,
@@ -50,7 +58,7 @@ const serviceSchema = new mongoose.Schema(
       required: false,
       default: []
     },
-    category: {
+    category_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'service_categories', // liên kết với bảng service_categories
       required: true,

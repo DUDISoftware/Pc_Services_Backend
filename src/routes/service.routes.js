@@ -1,5 +1,5 @@
 import express from 'express'
-import { verifyToken } from '~/middlewares/auth.middleware.js'
+import { verifyToken, verifyAdmin } from '~/middlewares/auth.middleware.js'
 import { serviceController } from '~/controllers/service.controller'
 import { serviceValidation } from '~/validations/service.validation.js'
 
@@ -12,7 +12,7 @@ Router.get('/:id', serviceController.getServiceById)
 Router.get('/slug/:slug', serviceValidation.getServiceBySlug, serviceController.getServiceBySlug)
 
 // Admin routes (cần token)
-Router.post('/', verifyToken, serviceValidation.createService, serviceController.createService)
+Router.post('/', verifyToken, verifyAdmin, serviceValidation.createService, serviceController.createService)
 Router.put('/:id', verifyToken, serviceValidation.updateService, serviceController.updateService)
 Router.patch('/:id/hide', verifyToken, serviceController.hideService)
 Router.delete('/:id', verifyToken, serviceController.deleteService)

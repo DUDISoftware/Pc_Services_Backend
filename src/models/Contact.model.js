@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 
 const schemaOptions = {
   timestamps: true,
+  collection: 'contacts',
   toJSON: {
     virtuals: true,
     versionKey: false,
@@ -39,9 +40,6 @@ const contactSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
-  },
-  {
-    collection: 'contacts',
   },
   schemaOptions
 );

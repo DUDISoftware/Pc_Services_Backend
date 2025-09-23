@@ -143,4 +143,10 @@ const searchRequests = async (query, page = 1, limit = 10) => {
   return { repair, order }
 }
 
-export { searchProducts, searchCategories, searchServices, searchServiceCategories, searchRequests }
+export const searchService = {
+  searchProducts,
+  searchCategories,
+  searchServices,
+  searchServiceCategories,
+  searchRequests
+}

@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 
 const schemaOptions = {
   timestamps: true,
+  collection: 'categories',
   toJSON: {
     virtuals: true,
     versionKey: false
@@ -37,8 +38,6 @@ const categorySchema = new mongoose.Schema({
     required: true,
     trim: true
   }
-}, {
-  collection: 'categories'
 }, schemaOptions)
 
 categorySchema.index({

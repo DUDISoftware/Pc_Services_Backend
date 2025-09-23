@@ -28,7 +28,6 @@ const seed = async () => {
     ServiceCategoryModel.deleteMany(),
     ProductModel.deleteMany(),
     ServiceModel.deleteMany(),
-    UserModel.deleteMany(),
     OrderRequestModel.deleteMany(),
     RepairRequestModel.deleteMany(),
     RatingModel.deleteMany(),
@@ -38,7 +37,7 @@ const seed = async () => {
   console.log('🧹 Cleared old data');
 
   // Step 1: Seed categories
-  const categoryDocs = await CategoryModel.insertMany([
+  const categoryDocs = await CategoryModel.create([
     { name: 'PC', tags: ['computer', 'gaming'], description: 'Personal Computers for work and gaming', slug: 'pc' },
     { name: 'Laptop', tags: ['computer', 'portable'], description: 'Laptops for all purposes', slug: 'laptop' },
     { name: 'Monitor', tags: ['computer', 'display'], description: 'High-resolution displays', slug: 'monitor' },
@@ -51,16 +50,18 @@ const seed = async () => {
     { name: 'Power Supply', tags: ['computer', 'hardware'], description: 'Power supply units', slug: 'power-supply' },
     { name: 'Cooling', tags: ['computer', 'hardware'], description: 'Cooling solutions for PCs', slug: 'cooling' },
     { name: 'Accessories', tags: ['computer', 'hardware'], description: 'PC accessories and peripherals', slug: 'accessories' },
-  ]);
+  ],
+  { timestamps: true }
+  );
 
   // Step 2: Seed service categories
-  const serviceCategoryDocs = await ServiceCategoryModel.insertMany([
+  const serviceCategoryDocs = await ServiceCategoryModel.create([
     { name: 'Repair Services', description: 'Hardware and software repair', status: 'active', slug: 'repair-services' },
     { name: 'Cleaning Services', description: 'PC and Laptop cleaning', status: 'active', slug: 'cleaning-services' },
   ]);
 
   // Step 3: Seed products
-  const productDocs = await ProductModel.insertMany([
+  const productDocs = await ProductModel.create([
     ...[...Array(5)].map(() => ({
       name: faker.commerce.productName(),
       description: faker.commerce.productDescription(),
@@ -89,14 +90,20 @@ const seed = async () => {
       category_id: categoryDocs[1]._id,
       images: [{ url: faker.image.url() }],
       tags: ['Laptop', 'Portable'],
+      ports: ['USB-C', 'HDMI'],
+      panel: 'IPS',
+      resolution: '2560x1440',
+      size: '15.6 inch',
       model: faker.vehicle.model(),
       status: 'available',
       is_featured: false
     })),
-  ]);
+  ],
+  { timestamps: true }
+);
 
   // Step 4: Seed services
-  const serviceDocs = await ServiceModel.insertMany([
+  const serviceDocs = await ServiceModel.create([
     {
       name: 'Laptop OS Reinstallation',
       description: 'Reinstall Windows/Linux with drivers',
@@ -119,20 +126,11 @@ const seed = async () => {
       status: 'active',
       image: [faker.image.url()]
     }
-  ]);
-
-  // Step 5: Seed users
-  const userDocs = await UserModel.insertMany([
-    ...[...Array(5)].map(() => ({
-      username: faker.internet.username(),
-      password: 'password123',
-      role: 'staff',
-      status: 'active'
-    }))
-  ]);
+  ]
+  , { timestamps: true });
 
   // Step 6: Seed order requests
-  await OrderRequestModel.insertMany([
+  await OrderRequestModel.create([
     ...[...Array(5)].map(() => ({
       items: [
         {
@@ -147,10 +145,12 @@ const seed = async () => {
       note: 'Urgent delivery',
       hidden: false
     }))
-  ]);
+  ]
+  , { timestamps: true }
+);
 
   // Step 7: Seed repair requests
-  await RepairRequestModel.insertMany([
+  await RepairRequestModel.create([
     ...[...Array(5)].map(() => ({
       service_id: faker.helpers.arrayElement(serviceDocs)._id,
       name: faker.person.fullName(),
@@ -163,10 +163,11 @@ const seed = async () => {
       status: 'new',
       hidden: false
     }))
-  ]);
+  ]
+  , { timestamps: true });
 
   // Step 8: Seed ratings
-  await RatingModel.insertMany([
+  await RatingModel.create([
     ...[...Array(5)].map(() => ({
       name: faker.person.firstName(),
       score: faker.number.int({ min: 3, max: 5 }),
@@ -174,17 +175,17 @@ const seed = async () => {
       product_id: faker.helpers.arrayElement(productDocs)._id,
       service_id: faker.helpers.arrayElement(serviceDocs)._id
     }))
-  ]);
+  ], { timestamps: true });
 
   // Step 9: Seed banners
-  await BannerModel.insertMany([
+  await BannerModel.create([
     ...[...Array(3)].map(() => ({
       title: faker.company.catchPhrase(),
       description: faker.lorem.sentence(),
       image: { url: faker.image.url() },
       link: faker.internet.url()
     }))
-  ]);
+  ], { timestamps: true });
 
   console.log('✅ Seed completed for topic: Computer & Related');
   process.exit(0);

@@ -59,7 +59,13 @@ const getAllRequests = async (req, res, next) => {
 const getRequestById = async (req, res, next) => {
   try {
     const { id } = req.params
-    const request = await searchService.getRequestById(id)
+    const request = await repairService.getRequestById(id)
+    if (!request) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        status: 'error',
+        message: 'Yêu cầu không tồn tại'
+      })
+    }
     res.status(StatusCodes.OK).json({
       status: 'success',
       request

@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 
 const schemaOptions = {
   timestamps: true,
+  collection: 'services',
   toJSON: {
     virtuals: true,
     versionKey: false,
@@ -63,12 +64,7 @@ const serviceSchema = new mongoose.Schema(
       ref: 'service_categories', // liên kết với bảng service_categories
       required: true,
     },
-  }, {
-  collection: 'services'
-},
-
-  schemaOptions
-);
+  }, schemaOptions);
 
 serviceSchema.index({
   name: 'text',

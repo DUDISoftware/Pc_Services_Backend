@@ -36,3 +36,16 @@ const getAllRequests = async (page = 1, limit = 10) => {
         .sort({ createdAt: -1 })
     return requests
 }
+
+const getRequestById = async (id) => {
+    const request = await Repair.findById(id)
+    return request
+}
+
+export const repairService = {
+    createRequest,
+    updateRequest,
+    hideRequest,
+    getRequestById,
+    getAllRequests
+}

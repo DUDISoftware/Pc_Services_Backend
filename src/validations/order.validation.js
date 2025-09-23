@@ -35,7 +35,7 @@ const createOrder = async (req, res, next) => {
 const updateOrder = async (req, res, next) => {
   const updateOrderRule = Joi.object({
     id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
-    items: Joi.array().items(productValidationRule).min(1).required(),
+    items: Joi.array().items(productValidationRule).min(1).optional(),
     name: Joi.string().optional().max(200).trim(),
     phone: Joi.string().optional().max(15).trim(),
     email: Joi.string().optional().allow('').max(100).trim(),

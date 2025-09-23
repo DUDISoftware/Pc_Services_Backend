@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 
 const schemaOptions = {
   timestamps: true,
+  collection: 'repair_requests',
   toJSON: {
     virtuals: true,
     versionKey: false,
@@ -50,9 +51,10 @@ const repairRequestSchema = new mongoose.Schema({
     required: true,
     maxlength: 500
   },
-  note: {
+  estimated_time: {
     type: String,
-    required: false
+    required: false,
+    maxlength: 100
   },
   status: {
     type: String,
@@ -64,12 +66,9 @@ const repairRequestSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
     required: false
-  }
-}, {
-  collection: 'repair_requests'
-},
-  schemaOptions
-);
+  },
+  images: [{ type: String, required: false }],
+}, schemaOptions );
 
 repairRequestSchema.index({
   name: 'text',

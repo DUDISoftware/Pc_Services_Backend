@@ -8,18 +8,18 @@ const createRating = async (reqBody) => {
   return newRating
 }
 
-const getRatingsByProductId = async (productId, page = 1, limit = 10) => {
+const getRatingsByProductId = async (id, page = 1, limit = 10) => {
   const skip = (page - 1) * limit
-  const ratings = await Rating.find({ product_id: productId })
+  const ratings = await Rating.find({ product_id: id })
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 })
   return ratings
 }
 
-const getRatingsByServiceId = async (serviceId, page = 1, limit = 10) => {
+const getRatingsByServiceId = async (id, page = 1, limit = 10) => {
   const skip = (page - 1) * limit
-  const ratings = await Rating.find({ service_id: serviceId })
+  const ratings = await Rating.find({ service_id: id })
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 })

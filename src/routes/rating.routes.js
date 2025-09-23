@@ -6,7 +6,7 @@ import { ratingValidation } from '~/validations/rating.validation.js'
 const Router = express.Router()
 
 Router.post('/', ratingValidation.createRating, ratingController.createRating)
-Router.get('/product/:productId', ratingValidation.getRatingByProduct, ratingController.getRatingByProduct)
+Router.get('/product/:id', ratingValidation.getRatingByProduct, ratingController.getRatingByProduct)
 Router.get('/service/:id', ratingValidation.getRatingByService, ratingController.getRatingByService)
 Router.delete('/:id', verifyToken, verifyAdmin, ratingValidation.deleteRating, ratingController.deleteRating)
 

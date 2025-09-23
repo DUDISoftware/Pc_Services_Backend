@@ -16,9 +16,11 @@ const createRepair = async (req, res, next) => {
     address: Joi.string().required().max(200).trim(),
     repair_type: Joi.string().required().valid('at_home', 'at_store').max(100).trim(),
     problem_description: Joi.string().required().max(500).trim(),
+    estimated_time: Joi.string().optional().max(100).trim(),
     note: Joi.string().optional().allow('').trim(),
     status: Joi.string().valid('new', 'in_progress', 'completed', 'cancelled').default('new'),
-    hidden: Joi.boolean().default(false)
+    hidden: Joi.boolean().default(false),
+    images: Joi.array().items(Joi.string().uri()).optional()
   })
   try {
     const data = req?.body ? req.body : {}
@@ -32,6 +34,7 @@ const createRepair = async (req, res, next) => {
 
 const updateRepair = async (req, res, next) => {
   const updateRepairRule = Joi.object({
+    id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
     service_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).optional(),
     name: Joi.string().optional().max(200).trim(),
     phone: Joi.string().optional().max(15).trim(),

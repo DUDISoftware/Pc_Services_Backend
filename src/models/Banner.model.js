@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 
 const schemaOptions = {
   timestamps: true,
+  collection: 'banners',
   toJSON: {
     virtuals: true,
     versionKey: false
@@ -26,8 +27,6 @@ const bannerSchema = new mongoose.Schema({
     type: String,
     required: true
   }
-}, {
-  collection: 'banners'
 }, schemaOptions)
 
 const BannerModel = mongoose.model('banners', bannerSchema)

@@ -17,10 +17,10 @@ Router.get('/', productController.getAllProducts) // ?page=1&limit=10
 Router.get('/featured', productController.getFeaturedProducts);
 Router.get('/search', productController.searchProducts) // ?query=abc&page=1&limit=10
 Router.get('/slug/:slug', productValidation.getProductBySlug, productController.getProductBySlug);
+Router.get('/category/:categoryId', productController.getProductsByCategory);
 Router.get('/:id', productController.getProductById)
 // product.route.js
 Router.get('/:id/related', productController.getRelatedProducts);
-Router.get('/category/:categoryId', productController.getProductsByCategory)
 
 
 export const productRoute = Router

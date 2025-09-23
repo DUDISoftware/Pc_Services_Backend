@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const schemaOptions = {
   timestamps: true,
+  collection: 'order_requests',
   toJSON: {
     virtuals: true,
     versionKey: false
@@ -37,6 +38,12 @@ const orderRequestSchema = new mongoose.Schema({
     trim: true,
     maxlength: 500
   },
+  address: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 200
+  },
   status: {
     type: String,
     enum: ['new', 'in_progress', 'completed', 'cancelled'],
@@ -48,10 +55,7 @@ const orderRequestSchema = new mongoose.Schema({
     default: false,
     required: false
   }
-}, {
-  collection: 'order_requests'
-}, schemaOptions
-);
+}, schemaOptions );
 
 orderRequestSchema.index({
   name: 'text',

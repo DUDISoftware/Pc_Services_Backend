@@ -7,6 +7,10 @@ const idValidationRule = Joi.object({
   id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required()
 })
 
+const slugValidationRule = Joi.object({
+  slug: Joi.string().max(200).trim().required()
+})
+
 const categoryIdValidationRule = Joi.object({
   categoryId: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required()
 })
@@ -95,7 +99,7 @@ const getProductsByCategory = async (req, res, next) => {
 const getProductBySlug = async (req, res, next) => {
   try {
     const params = req?.params ? req.params : {}
-    const validatedParams = await idValidationRule.validateAsync(params, { abortEarly: false })
+    const validatedParams = await slugValidationRule.validateAsync(params, { abortEarly: false })
     req.params = validatedParams
     next()
   } catch (error) {

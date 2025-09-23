@@ -37,3 +37,15 @@ const getAllRequests = async (page = 1, limit = 10) => {
     return requests
 }
 
+const getRequestById = async (id) => {
+    const request = await Order.findById(id)
+    return request
+}
+
+export const orderService = {
+    createRequest,
+    updateRequest,
+    hideRequest,
+    getRequestById,
+    getAllRequests
+}

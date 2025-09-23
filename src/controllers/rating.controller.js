@@ -12,8 +12,8 @@ const createRating = async (req, res, next) => {
 
 const getRatingByProduct = async (req, res, next) => {
   try {
-    const { productId } = req.params
-    const ratings = await ratingService.getRatingsByProductId(productId)
+    const { id } = req.params
+    const ratings = await ratingService.getRatingsByProductId(id)
     res.status(StatusCodes.OK).json(ratings)
   } catch (error) {
     next(error)

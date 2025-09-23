@@ -2,16 +2,17 @@ import mongoose from 'mongoose'
 
 const schemaOptions = {
   timestamps: true,
+  collection: 'ratings',
   toJSON: {
     virtuals: true,
-    versionKey: false,
-  },
+    versionKey: false
+  }
 };
 
 const ratingSchema = new mongoose.Schema(
   {
-    product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'products', required: true },
-    service_id: { type: mongoose.Schema.Types.ObjectId, ref: 'services', required: true },
+    product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'products', required: false },
+    service_id: { type: mongoose.Schema.Types.ObjectId, ref: 'services', required: false },
     name: {
       type: String,
       required: true,
@@ -29,13 +30,8 @@ const ratingSchema = new mongoose.Schema(
       required: false,
       trim: true,
       maxlength: 1000
-    },
-  },
-  {
-    collection: 'ratings'
-  }
-  , schemaOptions
-);
+    }
+  }, schemaOptions );
 
 ratingSchema.index({
   name: 'text',

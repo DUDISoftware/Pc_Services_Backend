@@ -1,15 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import CategoryModel from '../src/models/Category.model.js';
-import ServiceCategoryModel from '../src/models/ServiceCategory.model.js';
-import ProductModel from '../src/models/Product.model.js';
-import ServiceModel from '../src/models/Service.model.js';
-import BannerModel from '../src/models/Banner.model.js';
 import UserModel from '../src/models/User.model.js';
-import OrderRequestModel from '../src/models/OrderRequest.model.js';
-import RepairRequestModel from '../src/models/RepairRequest.model.js';
-import RatingModel from '../src/models/Rating.model.js';
-import ContactModel from '../src/models/Contact.model.js';
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
 
@@ -24,132 +15,16 @@ const seed = async () => {
   await connectDB();
 
   await Promise.all([
-    CategoryModel.deleteMany(),
-    ServiceCategoryModel.deleteMany(),
-    ProductModel.deleteMany(),
-    ServiceModel.deleteMany(),
-    BannerModel.deleteMany(),
     UserModel.deleteMany(),
-    OrderRequestModel.deleteMany(),
-    RepairRequestModel.deleteMany(),
-    RatingModel.deleteMany(),
-    ContactModel.deleteMany(),
   ]);
-
-  const categoryDocs = await CategoryModel.insertMany(
-    [...Array(10)].map(() => ({
-      name: faker.commerce.department(),
-      description: faker.commerce.productDescription(),
-    }))
-  );
-
-  const serviceCategoryDocs = await ServiceCategoryModel.insertMany(
-    [...Array(10)].map(() => ({
-      name: faker.company.name(),
-      description: faker.company.catchPhrase(),
-      status: faker.helpers.arrayElement(['active', 'inactive']),
-    }))
-  );
-
-  const productDocs = await ProductModel.insertMany(
-    [...Array(20)].map(() => ({
-      name: faker.commerce.productName(),
-      tags: [faker.commerce.productAdjective(), faker.commerce.productMaterial()],
-      ports: faker.helpers.arrayElements(['USB-C', 'USB-A', 'HDMI', 'Ethernet', 'Audio Jack'], { min: 1, max: 3 }),
-      size: faker.helpers.arrayElement(['Small', 'Medium', 'Large']),
-      panel: faker.helpers.arrayElement(['IPS', 'TN', 'VA']),
-      resolution: faker.helpers.arrayElement(['1920x1080', '2560x1440', '3840x2160']),
-      model: faker.vehicle.model(),
-      description: faker.commerce.productDescription(),
-      price: parseFloat(faker.commerce.price()),
-      quantity: faker.number.int({ min: 1, max: 100 }),
-      category_id: faker.helpers.arrayElement(categoryDocs)._id,
-      brand: faker.company.name(),
-      images: [{ url: faker.image.url() }],
-      status: faker.helpers.arrayElement(['available', 'out_of_stock', 'hidden']),
-      is_featured: faker.datatype.boolean()
-    }))
-  );
-
-  const serviceDocs = await ServiceModel.insertMany(
-    [...Array(20)].map(() => ({
-      name: faker.company.catchPhrase(),
-      description: faker.lorem.paragraph(),
-      price: faker.number.int({ min: 50, max: 500 }),
-      type: faker.helpers.arrayElement(['home', 'store']),
-      estimated_time: `${faker.number.int({ min: 30, max: 120 })} minutes`,
-      status: faker.helpers.arrayElement(['active', 'inactive', 'hidden']),
-      category: faker.helpers.arrayElement(serviceCategoryDocs)._id,
-      image: [faker.image.url()]
-    }))
-  );
-
-  await BannerModel.insertMany(
-    [...Array(10)].map(() => ({
-      title: faker.company.catchPhrase(),
-      description: faker.lorem.sentence(),
-      image: { url: faker.image.url() },
-      link: faker.internet.url()
-    }))
-  );
 
   const salt = await bcrypt.genSalt(10);
   const userDocs = await UserModel.insertMany(
     [...Array(10)].map(() => ({
       username: faker.internet.username(),
-      password: bcrypt.hashSync('password123', salt),
+      password: bcrypt.hashSync('123456', salt),
       role: faker.helpers.arrayElement(['admin', 'staff']),
       status: faker.helpers.arrayElement(['active', 'locked']),
-    }))
-  );
-
-  await OrderRequestModel.insertMany(
-    [...Array(15)].map(() => ({
-      items: [{
-        product_id: faker.helpers.arrayElement(productDocs)._id,
-        quantity: faker.number.int({ min: 1, max: 3 })
-      }],
-      name: faker.person.fullName(),
-      phone: faker.helpers.replaceSymbols('0## ### ####'),
-      email: faker.internet.email(),
-      note: faker.lorem.sentence(),
-      status: faker.helpers.arrayElement(['new', 'in_progress', 'completed', 'cancelled']),
-      hidden: faker.datatype.boolean()
-    }))
-  );
-
-  await RepairRequestModel.insertMany(
-    [...Array(15)].map(() => ({
-      service_id: faker.helpers.arrayElement(serviceDocs)._id,
-      name: faker.person.fullName(),
-      phone: faker.helpers.replaceSymbols('0## ### ####'),
-      email: faker.internet.email(),
-      address: faker.location.streetAddress(),
-      repair_type: faker.helpers.arrayElement(['at_home', 'at_store']),
-      problem_description: faker.lorem.sentences(2),
-      note: faker.lorem.sentence(),
-      status: faker.helpers.arrayElement(['new', 'in_progress', 'completed', 'cancelled']),
-      hidden: faker.datatype.boolean()
-    }))
-  );
-
-  await RatingModel.insertMany(
-    [...Array(20)].map(() => ({
-      name: faker.person.fullName(),
-      score: faker.number.int({ min: 1, max: 5 }),
-      comment: faker.lorem.sentences(2),
-      product_id: faker.helpers.arrayElement(productDocs)._id,
-      service_id: faker.helpers.arrayElement(serviceDocs)._id
-    }))
-  );
-
-  await ContactModel.insertMany(
-    [...Array(10)].map(() => ({
-      name: faker.person.fullName(),
-      email: faker.internet.email(),
-      phone: faker.helpers.replaceSymbols('0## ### ####'),
-      address: faker.location.streetAddress(),
-      map_link: faker.internet.url()
     }))
   );
 

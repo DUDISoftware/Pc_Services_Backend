@@ -4,6 +4,7 @@ import { orderValidation } from '~/validations/order.validation';
 import { repairController } from '~/controllers/repairRequest.controller';
 import { repairValidation } from '~/validations/repair.validation';
 import { verifyToken, verifyAdmin } from '~/middlewares/auth.middleware.js'
+import { searchService } from '~/services/search.service';
 
 const Router = express.Router()
 // Order Requests
@@ -26,5 +27,16 @@ Router.get('/repairs/:id', verifyToken, verifyAdmin, repairValidation.getRepairB
 Router.get('/repairs/service/:serviceId', verifyToken, verifyAdmin, repairValidation.getRepairsByService, repairController.getRequestsByService)
 Router.get('/repairs/status/:status', verifyToken, verifyAdmin, repairValidation.getRepairsByStatus, repairController.getRequestsByStatus)
 Router.get('/repairs/search', verifyToken, verifyAdmin, repairController.searchRequests) // ?query=abc&page=1&limit=10
+
+Router.get('/search', async (req, res) => {
+  const { query, page = 1, limit = 10 } = req.query;
+  try {
+    const results = await searchService.searchRequests(query, { page, limit });
+    res.json(results);
+  } catch (error) {
+    console.error('❌ Lỗi khi tìm kiếm:', error);
+    res.status(500).json({ error: 'Lỗi khi tìm kiếm' });
+  }
+});
 
 export const requestRoute = Router

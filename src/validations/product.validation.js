@@ -24,7 +24,14 @@ const createProduct = async (req, res, next) => {
     category_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
     brand: Joi.string().required().max(100).trim(),
     status: Joi.string().valid('available', 'out_of_stock', 'hidden').default('available'),
-    tags: Joi.array().items(Joi.string().max(200).trim()).optional()
+    tags: Joi.array().items(Joi.string().max(200).trim()).optional(),
+    ports: Joi.array().items(Joi.string().max(100).trim()).optional(),
+    model: Joi.string().max(100).trim().optional(),
+    resolution: Joi.string().max(100).trim().optional(),
+    size: Joi.string().max(100).trim().optional(),
+    panel: Joi.string().max(100).trim().optional(),
+    slug: Joi.string().max(200).trim().required(),
+    images: Joi.array().items(Joi.string().uri()).optional()
   })
 
   try {

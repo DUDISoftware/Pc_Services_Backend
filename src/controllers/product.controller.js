@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes'
 import { productService } from '~/services/product.service'
-import { searchProducts as searchService } from '~/services/search.service.js'
+import { searchService } from '~/services/search.service.js'
 
 const createProduct = async (req, res, next) => {
   try {
@@ -123,7 +123,7 @@ const searchProducts = async (req, res, next) => {
         message: 'Query parameter is required'
       })
     }
-    const products = await searchService(query, Number(page), Number(limit));
+    const products = await searchService.searchProducts(query, Number(page), Number(limit));
     res.status(StatusCodes.OK).json({
       status: 'success',
       page: Number(page),

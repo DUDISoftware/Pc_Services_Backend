@@ -40,8 +40,8 @@ const serviceSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['home', 'store'],
-      default: 'store'
+      enum: ['at_home', 'at_store'],
+      default: 'at_store'
     },
     estimated_time: {
       type: String,

@@ -127,7 +127,8 @@ const searchRequests = async (query, page = 1, limit = 10) => {
       { name: regex },
       { email: regex },
       { phone: regex },
-      { address: regex }
+      { address: regex },
+      { problem_description: regex }
     ]
   }).skip(skip).limit(limit)
 
@@ -136,7 +137,8 @@ const searchRequests = async (query, page = 1, limit = 10) => {
       { name: regex },
       { email: regex },
       { phone: regex },
-      { address: regex }
+      { address: regex },
+      { note: regex }
     ]
   }).skip(skip).limit(limit)
 

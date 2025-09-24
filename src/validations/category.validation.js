@@ -11,7 +11,8 @@ const idValidationRule = Joi.object({
 const createCategory = async (req, res, next) => {
   const createCategoryRule = Joi.object({
     name: Joi.string().max(100).required(),
-    description: Joi.string().required()
+    description: Joi.string().required(),
+    slug: Joi.string().max(200).required()
   })
 
   try {
@@ -27,7 +28,8 @@ const createCategory = async (req, res, next) => {
 const updateCategory = async (req, res, next) => {
   const updateCategoryRule = Joi.object({
     name: Joi.string().max(100).optional(),
-    description: Joi.string().optional()
+    description: Joi.string().optional(),
+    slug: Joi.string().max(200).optional()
   })
 
   try {

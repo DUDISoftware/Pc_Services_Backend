@@ -1,6 +1,18 @@
 import { StatusCodes } from 'http-status-codes'
 import { bannerService } from '~/services/banner.service.js'
 
+const getAllBanners = async (req, res, next) => {
+  try {
+    const banners = await bannerService.getAllBanners()
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      banners
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 const createBanner = async (req, res, next) => {
   try {
     const file = req.file
@@ -52,6 +64,7 @@ const deleteBanner = async (req, res, next) => {
 }
 
 export const bannerController = {
+  getAllBanners,
   createBanner,
   updateBanner,
   deleteBanner

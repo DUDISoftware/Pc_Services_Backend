@@ -2,6 +2,12 @@ import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
 import BannerModel from '~/models/Banner.model.js'
 import { deleteImage } from '~/utils/cloudinary.js'
+import { get } from 'mongoose'
+
+const getAllBanners = async () => {
+  const banners = await BannerModel.find().sort({ created_at: -1 })
+  return banners
+}
 
 const createBanner = async (reqBody, file) => {
   const bannerData = {
@@ -54,6 +60,7 @@ const deleteBanner = async (id) => {
 }
 
 export const bannerService = {
+  getAllBanners,
   createBanner,
   updateBanner,
   deleteBanner

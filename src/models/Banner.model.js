@@ -1,3 +1,4 @@
+import { number } from 'joi'
 import mongoose from 'mongoose'
 
 const schemaOptions = {
@@ -26,6 +27,11 @@ const bannerSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true
+  },
+  position: {
+    type: Number,
+    default: 0,
+    enum: [0, 1, 2, 3, 4] // 0: no use
   }
 }, schemaOptions)
 

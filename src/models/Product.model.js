@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 
 const schemaOptions = {
   timestamps: true,
+  collection: 'products',
   toJSON: {
     virtuals: true,
     versionKey: false
@@ -14,6 +15,56 @@ const productSchema = new mongoose.Schema({
     required: true,
     trim: true,
     maxlength: 200
+  },
+  tags: {
+    type: [String],
+    default: [],
+    trim: true,
+    maxlength: 200,
+    required: false
+  },
+  slug:{
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 200,
+    unique: true,
+    index: true
+  },
+  ports: {
+    type: [String],
+    default: [],
+    trim: true,
+    maxLength: 50,
+    required: false
+  },
+  panel: {
+    type: String,
+    default: '',
+    trim: true,
+    maxLength: 100,
+    required: false
+  },
+  resolution: {
+    type: String,
+    default: '',
+    trim: true,
+    maxLength: 50,
+    required: false
+  },
+  size: {
+    type: String,
+    default: '',
+    trim: true,
+    maxLength: 50,
+    required: false
+  },
+  model: {
+    type: String,
+    default: '',
+    trim: true,
+    maxLength: 100,
+    required: false
   },
   description: {
     type: String,
@@ -55,6 +106,11 @@ const productSchema = new mongoose.Schema({
   }
 }, schemaOptions)
 
+productSchema.index({
+  name: 'text',
+  tags: 'text',
+  brand: 'text'
+})
 
 const ProductModel = mongoose.model('products', productSchema)
 

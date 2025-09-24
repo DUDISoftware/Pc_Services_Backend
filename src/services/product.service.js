@@ -48,7 +48,7 @@ const deleteProduct = async (id) => {
 const getAllProducts = async (page = 1, limit = 10) => {
   const skip = (page - 1) * limit
   const products = await ProductModel.find()
-    .populate('category_id', 'name')
+    .populate('category_id', 'name slug')
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 })
@@ -97,7 +97,7 @@ const getProductById = async (id) => {
 const getProductsByCategory = async (categoryId, page = 1, limit = 10) => {
   const skip = (page - 1) * limit
   const products = await ProductModel.find({ category_id: categoryId })
-    .populate('category_id', 'name')
+    .populate('category_id', 'name slug')
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 })
@@ -113,6 +113,12 @@ const getProductsByCategory = async (categoryId, page = 1, limit = 10) => {
   }
 }
 
+const getProductBySlug = async (slug) => {
+  const product = await ProductModel.findOne({ slug }).populate('category_id', 'name slug');
+  if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
+  return product;
+}
+
 export const productService = {
   createProduct,
   updateProduct,
@@ -121,5 +127,6 @@ export const productService = {
   getProductById,
   getProductsByCategory,
   getFeaturedProducts,
-  getRelatedProducts
+  getRelatedProducts,
+  getProductBySlug
 };

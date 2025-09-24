@@ -1,6 +1,7 @@
 // src/controllers/serviceCategory.controller.js
 import { StatusCodes } from 'http-status-codes';
 import { serviceCategoryService } from '~/services/serviceCategory.service.js'
+import { searchServiceCategories as searchService } from '~/services/search.service.js'
 
 const createCategory = async (req, res, next) => {
   try {
@@ -49,6 +50,15 @@ const getCategoryById = async (req, res, next) => {
   }
 };
 
+const getCategoryBySlug = async (req, res, next) => {
+  try {
+    const category = await serviceCategoryService.getCategoryBySlug(req.params.slug);
+    res.status(StatusCodes.OK).json({ status: 'success', category });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const deleteCategory = async (req, res, next) => {
   try {
     await serviceCategoryService.deleteCategory(req.params.id);
@@ -61,10 +71,33 @@ const deleteCategory = async (req, res, next) => {
   }
 };
 
+const searchCategories = async (req, res, next) => {
+  try {
+    let { query, page = 1, limit = 10 } = req.query;
+
+    if (!query || query.trim() === '') {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        status: 'fail',
+        message: 'Query parameter is required',
+      });
+    }
+
+    const results = await searchService(query, page, limit);
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      results,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const serviceCategoryController = {
   createCategory,
   updateCategory,
   getAllCategories,
   getCategoryById,
+  getCategoryBySlug,
   deleteCategory,
+  searchCategories
 };

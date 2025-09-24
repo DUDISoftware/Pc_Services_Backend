@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 
 const schemaOptions = {
   timestamps: true,
+  collection: 'users',
   toJSON: {
     virtuals: true,
     versionKey: false
@@ -12,6 +13,7 @@ const schemaOptions = {
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
+    index: true,
     required: true,
     unique: true,
     trim: true
@@ -30,16 +32,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['active', 'locked'],
     default: 'active'
-  },
-  created_at: {
-    type: Date,
-    default: Date.now
-  },
-  updated_at: {
-    type: Date,
-    default: Date.now
   }
-}, schemaOptions)
+}, schemaOptions );
 
 userSchema.pre('save', async function (next) {
   if (this.isModified('password')) {

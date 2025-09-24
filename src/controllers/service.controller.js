@@ -1,5 +1,6 @@
 import { StatusCodes } from 'http-status-codes'
 import { serviceService } from '~/services/customerService.service'
+import { searchServices as searchService } from '~/services/search.service.js'
 
 const createService = async (req, res, next) => {
   try {
@@ -60,6 +61,16 @@ const getServiceById = async (req, res, next) => {
   }
 }
 
+const getServiceBySlug = async (req, res, next) => {
+  try {
+    const { slug } = req.params
+    const service = await serviceService.getServiceBySlug(slug)
+    res.status(StatusCodes.OK).json({ status: 'success', service })
+  } catch (error) {
+    next(error)
+  }
+}
+
 const deleteService = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -73,11 +84,33 @@ const deleteService = async (req, res, next) => {
   }
 }
 
+const searchServices = async (req, res, next) => {
+  try {
+    let { query, page = 1, limit = 10 } = req.query
+    if (!query || query.trim() === '') {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        status: 'fail',
+        message: 'Query parameter is required'
+      })
+    }
+
+    const results = await searchService(query, page, limit)
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      results
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const serviceController = {
   createService,
   updateService,
   hideService,
   getAllServices,
   getServiceById,
-  deleteService
+  getServiceBySlug,
+  deleteService,
+  searchServices
 }

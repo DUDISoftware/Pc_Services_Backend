@@ -1,5 +1,6 @@
 import { StatusCodes } from 'http-status-codes'
 import { productService } from '~/services/product.service'
+import { searchService } from '~/services/search.service.js'
 
 const createProduct = async (req, res, next) => {
   try {
@@ -103,6 +104,39 @@ const getProductsByCategory = async (req, res, next) => {
   }
 }
 
+const getProductBySlug = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+    const product = await productService.getProductBySlug(slug);
+    res.status(StatusCodes.OK).json({ status: 'success', product });
+  } catch (error) {
+    next(error);
+  }
+}
+
+const searchProducts = async (req, res, next) => {
+  try {
+    const { query, page = 1, limit = 10 } = req.query;
+    if (!query || query.trim() === '') {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        status: 'fail',
+        message: 'Query parameter is required'
+      })
+    }
+    const products = await searchService.searchProducts(query, Number(page), Number(limit));
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      page: Number(page),
+      limit: Number(limit),
+      results: products.length,
+      products
+    });
+  } catch (error) {
+    next(error);
+  }
+
+}
+
 export const productController = {
   createProduct,
   updateProduct,
@@ -110,6 +144,8 @@ export const productController = {
   getAllProducts,
   getProductById,
   getProductsByCategory,
+  getProductBySlug,
   getFeaturedProducts,
-  getRelatedProducts
+  getRelatedProducts,
+  searchProducts
 }

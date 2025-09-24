@@ -11,7 +11,9 @@ const createBanner = async (req, res, next) => {
   const createBannerRule = Joi.object({
     title: Joi.string().max(200).required(),
     description: Joi.string().max(500).required(),
-    link: Joi.string().required()
+    link: Joi.string().required(),
+    position: Joi.number().valid(0, 1, 2, 3, 4).required(), // 0: no use
+    image: Joi.array().items(Joi.string().uri()).optional()
   })
   try {
     const data = req?.body ? req.body : {}
@@ -27,7 +29,8 @@ const updateBanner = async (req, res, next) => {
   const updateBannerRule = Joi.object({
     title: Joi.string().optional(),
     description: Joi.string().optional(),
-    link: Joi.string().optional()
+    link: Joi.string().optional(),
+    position: Joi.number().valid(0, 1, 2, 3, 4).optional() // 0: no use
   })
   try {
     const data = req?.body ? req.body : {}

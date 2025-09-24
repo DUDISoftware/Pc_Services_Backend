@@ -2,6 +2,7 @@
 import express from 'express'
 import cors from 'cors'
 import { CONNECT_DB } from '~/config/db.js'
+import { CONNECT_REDIS } from '~/config/redis.js'
 import { env } from '~/config/environment.js'
 import { APIs } from '~/routes/index.js'
 import { errorHandler } from '~/middlewares/error.middleware.js'
@@ -30,6 +31,9 @@ app.use(cors({
   console.log('Connecting to database...')
   await CONNECT_DB()
   console.log('Database connected successfully')
+  console.log('Connecting to Redis')
+  await CONNECT_REDIS()
+  console.log('Redis connected')
   console.log('Starting server...')
   await START_SERVER()
 })()

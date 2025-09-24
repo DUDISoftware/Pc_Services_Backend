@@ -7,6 +7,10 @@ const idValidationRule = Joi.object({
   id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required()
 })
 
+const slugValidationRule = Joi.object({
+  slug: Joi.string().max(200).trim().required()
+})
+
 const categoryIdValidationRule = Joi.object({
   categoryId: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required()
 })
@@ -19,7 +23,15 @@ const createProduct = async (req, res, next) => {
     quantity: Joi.number().required().min(0),
     category_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
     brand: Joi.string().required().max(100).trim(),
-    status: Joi.string().valid('available', 'out_of_stock', 'hidden').default('available')
+    status: Joi.string().valid('available', 'out_of_stock', 'hidden').default('available'),
+    tags: Joi.array().items(Joi.string().max(200).trim()).optional(),
+    ports: Joi.array().items(Joi.string().max(100).trim()).optional(),
+    model: Joi.string().max(100).trim().optional(),
+    resolution: Joi.string().max(100).trim().optional(),
+    size: Joi.string().max(100).trim().optional(),
+    panel: Joi.string().max(100).trim().optional(),
+    slug: Joi.string().max(200).trim().required(),
+    images: Joi.array().items(Joi.string().uri()).optional()
   })
 
   try {
@@ -91,10 +103,22 @@ const getProductsByCategory = async (req, res, next) => {
   }
 }
 
+const getProductBySlug = async (req, res, next) => {
+  try {
+    const params = req?.params ? req.params : {}
+    const validatedParams = await slugValidationRule.validateAsync(params, { abortEarly: false })
+    req.params = validatedParams
+    next()
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
+  }
+}
+
 export const productValidation = {
   createProduct,
   updateProduct,
   deleteProduct,
+  getProductBySlug,
   getProductById,
   getProductsByCategory
 }

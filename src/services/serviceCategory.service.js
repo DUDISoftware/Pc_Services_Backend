@@ -27,6 +27,12 @@ const getCategoryById = async (id) => {
   return category;
 };
 
+const getCategoryBySlug = async (slug) => {
+  const category = await ServiceCategoryModel.findOne({ slug });
+  if (!category) throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found');
+  return category;
+};
+
 const deleteCategory = async (id) => {
   const hasServices = await ServiceModel.exists({ category: id })
   if (hasServices) {
@@ -41,5 +47,6 @@ export const serviceCategoryService = {
   updateCategory,
   getAllCategories,
   getCategoryById,
+  getCategoryBySlug,
   deleteCategory,
 };

@@ -11,7 +11,8 @@ const idValidationRule = Joi.object({
 const createCategory = async (req, res, next) => {
   const createCategoryRule = Joi.object({
     name: Joi.string().max(100).required(),
-    description: Joi.string().required()
+    description: Joi.string().required(),
+    slug: Joi.string().max(200).required()
   })
 
   try {
@@ -27,7 +28,8 @@ const createCategory = async (req, res, next) => {
 const updateCategory = async (req, res, next) => {
   const updateCategoryRule = Joi.object({
     name: Joi.string().max(100).optional(),
-    description: Joi.string().optional()
+    description: Joi.string().optional(),
+    slug: Joi.string().max(200).optional()
   })
 
   try {
@@ -67,9 +69,21 @@ const getCategoryById = async (req, res, next) => {
   }
 }
 
+const getCategoryBySlug = async (req, res, next) => {
+  try {
+    const params = req?.params ? req.params : {}
+    const validatedParams = await idValidationRule.validateAsync(params, { abortEarly: false })
+    req.params = validatedParams
+    next()
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
+  }
+}
+
 export const categoryValidation = {
   createCategory,
   updateCategory,
   deleteCategory,
+  getCategoryBySlug,
   getCategoryById
 }

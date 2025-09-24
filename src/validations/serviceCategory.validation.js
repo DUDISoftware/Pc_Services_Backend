@@ -21,6 +21,13 @@ const updateCategory = Joi.object({
   status: Joi.string().valid('active', 'inactive'),
 });
 
+const getCategoryBySlug = Joi.object({
+  slug: Joi.string().required().messages({
+    'any.required': 'Slug là bắt buộc',
+    'string.empty': 'Slug không được để trống',
+  }),
+});
+
 const idValidationRule = Joi.object({
   id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
 });
@@ -29,4 +36,5 @@ export const serviceCategoryValidation = {
   createCategory,
   updateCategory,
   idValidationRule,
+  getCategoryBySlug,
 };

@@ -2,6 +2,7 @@ import mongoose from 'mongoose'
 
 const schemaOptions = {
   timestamps: true,
+  collection: 'service_categories',
   toJSON: {
     virtuals: true,
     versionKey: false
@@ -12,9 +13,18 @@ const serviceCategorySchema = new mongoose.Schema(
   {
     name: {
       type: String,
+      index: true,
       required: true,
       trim: true,
       maxlength: 200
+    },
+    slug:{
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 200,
+      unique: true,
+      index: true
     },
     description: {
       type: String,
@@ -25,9 +35,13 @@ const serviceCategorySchema = new mongoose.Schema(
       enum: ['active', 'inactive'],
       default: 'active'
     }
-  },
-  schemaOptions
-)
+  }, schemaOptions );
+
+serviceCategorySchema.index({
+  name: 'text',
+  description: 'text'
+});
+
 const ServiceCategoryModel = mongoose.model(
   'service_categories',
   serviceCategorySchema

@@ -46,13 +46,21 @@ const createProduct = async (req, res, next) => {
 
 const updateProduct = async (req, res, next) => {
   const updateProductRule = Joi.object({
-    name: Joi.string().optional().max(200).trim(),
+    name: Joi.string().required().max(200).trim(),
     description: Joi.string().optional().allow('').trim(),
-    price: Joi.number().optional().min(0),
-    quantity: Joi.number().optional().min(0),
-    category_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).optional(),
-    brand: Joi.string().optional().max(100).trim(),
-    status: Joi.string().valid('available', 'out_of_stock', 'hidden').optional()
+    price: Joi.number().required().min(0),
+    quantity: Joi.number().required().min(0),
+    category_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
+    brand: Joi.string().required().max(100).trim(),
+    status: Joi.string().valid('available', 'out_of_stock', 'hidden').default('available'),
+    tags: Joi.array().items(Joi.string().max(200).trim()).optional(),
+    ports: Joi.array().items(Joi.string().max(100).trim()).optional(),
+    model: Joi.string().max(100).trim().optional(),
+    resolution: Joi.string().max(100).trim().optional(),
+    size: Joi.string().max(100).trim().optional(),
+    panel: Joi.string().max(100).trim().optional(),
+    slug: Joi.string().max(200).trim().required(),
+    images: Joi.array().items(Joi.string().uri()).optional()
   })
 
   try {

@@ -34,14 +34,14 @@ const createService = async (req, res, next) => {
 
 const updateService = async (req, res, next) => {
   const schema = Joi.object({
-    name: Joi.string().max(100).optional(),
-    description: Joi.string().max(2000).optional(),
-    price: Joi.number().positive().optional(),
-    type: Joi.string().valid('home', 'store').optional(),
-    estimated_time: Joi.string().max(50).optional(),
-    status: Joi.string().valid('active', 'inactive', 'hidden').optional(),
-    category_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).optional(), // ✅ cho phép update category
-    slug: Joi.string().max(100).optional()
+    name: Joi.string().max(100).required(),
+    description: Joi.string().max(2000).required(),
+    price: Joi.number().positive().required(),
+    type: Joi.string().valid('at_home', 'at_store').default('at_store'),
+    estimated_time: Joi.string().max(50).required(),
+    status: Joi.string().valid('active', 'inactive', 'hidden').default('active'),
+    category_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(), // ✅ bắt buộc có category
+    slug: Joi.string().max(100).required()
   });
 
   try {

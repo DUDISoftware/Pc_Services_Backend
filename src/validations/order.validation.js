@@ -8,7 +8,7 @@ const idValidationRule = Joi.object({
 })
 
 const productValidationRule = Joi.object({
-  productId: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
+  product_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
   quantity: Joi.number().required().min(1)
 })
 
@@ -18,6 +18,7 @@ const createOrder = async (req, res, next) => {
     name: Joi.string().required().max(200).trim(),
     phone: Joi.string().required().max(15).trim(),
     email: Joi.string().optional().allow('').max(100).trim(),
+    address: Joi.string().required().max(200).trim(),
     note: Joi.string().optional().allow('').max(500).trim(),
     status: Joi.string().valid('new', 'in_progress', 'completed', 'cancelled').default('new'),
     hidden: Joi.boolean().default(false)
@@ -39,9 +40,10 @@ const updateOrder = async (req, res, next) => {
     name: Joi.string().optional().max(200).trim(),
     phone: Joi.string().optional().max(15).trim(),
     email: Joi.string().optional().allow('').max(100).trim(),
+    address: Joi.string().optional().max(200).trim(),
     note: Joi.string().optional().allow('').max(500).trim(),
-    status: Joi.string().valid('new', 'in_progress', 'completed', 'cancelled').optional(),
-    hidden: Joi.boolean().optional()
+    status: Joi.string().valid('new', 'in_progress', 'completed', 'cancelled').default('new'),
+    hidden: Joi.boolean().default(false)
   })
   try {
     const data = req?.body ? req.body : {}

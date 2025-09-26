@@ -1,6 +1,5 @@
 import { StatusCodes } from 'http-status-codes'
 import { bannerService } from '~/services/banner.service.js'
-
 const getAllBanners = async (req, res, next) => {
   try {
     const banners = await bannerService.getAllBanners()
@@ -16,11 +15,10 @@ const getAllBanners = async (req, res, next) => {
 const createBanner = async (req, res, next) => {
   try {
     const file = req.file
-
     if (!file) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         status: 'error',
-        message: 'Image file is required. Please make sure to send the file with field name "image"'
+        message: 'Image file is required. Please send the file with field name "image"'
       })
     }
 

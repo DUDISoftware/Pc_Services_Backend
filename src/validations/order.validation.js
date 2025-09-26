@@ -46,8 +46,9 @@ const updateOrder = async (req, res, next) => {
     hidden: Joi.boolean().default(false)
   })
   try {
-    const data = req?.body ? req.body : {}
+    const payload = req?.body ? req.body : {}
     const params = req?.params ? req.params : {}
+    const data = { ...payload, ...params }
     const validatedParams = await idValidationRule.validateAsync(params, { abortEarly: false })
     const validatedData = await updateOrderRule.validateAsync(data, { abortEarly: false })
     req.body = validatedData

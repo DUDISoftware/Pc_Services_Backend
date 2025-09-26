@@ -5,6 +5,8 @@ import { repairController } from '~/controllers/repairRequest.controller';
 import { repairValidation } from '~/validations/repair.validation';
 import { verifyToken, verifyAdmin } from '~/middlewares/auth.middleware.js'
 import { searchService } from '~/services/search.service';
+import { uploadImage } from '~/middlewares/upload.middleware.js'
+
 
 const Router = express.Router()
 // Order Requests
@@ -18,9 +20,10 @@ Router.get('/orders/status/:status', verifyToken, verifyAdmin, orderValidation.g
 Router.get('/orders/search', verifyToken, verifyAdmin, orderController.searchRequests) // ?query=abc&page=1&limit=10
 
 // Repair Requests
-Router.post('/repairs', repairValidation.createRepair, repairController.createRequest)
-Router.put('/repairs/:id', verifyToken, verifyAdmin, repairValidation.updateRepair, repairController.updateRequest)
+Router.post('/repairs', uploadImage.array('images'), repairValidation.createRepair, repairController.createRequest)
+Router.put('/repairs/:id', verifyToken, verifyAdmin, uploadImage.array('images'), repairValidation.updateRepair, repairController.updateRequest)
 Router.patch('/repairs/:id', verifyToken, verifyAdmin, repairValidation.hideRepair, repairController.hideRequest)
+Router.delete('/repairs/:id', verifyToken, verifyAdmin, repairValidation.deleteRepair, repairController.deleteRequest)
 
 Router.get('/repairs', verifyToken, verifyAdmin, repairController.getAllRequests) // ?page=1&limit=10
 Router.get('/repairs/:id', verifyToken, verifyAdmin, repairValidation.getRepairById, repairController.getRequestById)

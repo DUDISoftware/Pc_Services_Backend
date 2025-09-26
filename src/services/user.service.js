@@ -30,7 +30,6 @@ const register = async (reqBody) => {
   if (existingUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Tên đăng nhập đã tồn tại')
   }
-  console.log('Registering user with data:', reqBody);
   const user = new UserModel(reqBody)
   await user.save()
   const returnedUser = user.toObject()

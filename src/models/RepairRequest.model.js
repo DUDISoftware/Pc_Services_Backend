@@ -67,7 +67,10 @@ const repairRequestSchema = new mongoose.Schema({
     default: false,
     required: false
   },
-  images: [{ type: String, required: false }],
+  images: {
+    type: [Object],
+    default: []
+  }
 }, schemaOptions );
 
 repairRequestSchema.index({

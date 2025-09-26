@@ -17,13 +17,16 @@ const createRepair = async (req, res, next) => {
     repair_type: Joi.string().required().valid('at_home', 'at_store').max(100).trim(),
     problem_description: Joi.string().required().max(500).trim(),
     estimated_time: Joi.string().optional().max(100).trim(),
-    note: Joi.string().optional().allow('').trim(),
     status: Joi.string().valid('new', 'in_progress', 'completed', 'cancelled').default('new'),
     hidden: Joi.boolean().default(false),
-    images: Joi.array().items(Joi.string().uri()).optional()
+    images: Joi.array().items({
+      url: Joi.string().uri().required(),
+      public_id: Joi.string().required()
+    }).optional()
   })
   try {
     const data = req?.body ? req.body : {}
+    console.log('Request body for creating repair:', data);
     const validatedData = await createRepairRule.validateAsync(data, { abortEarly: false })
     req.body = validatedData
     next()
@@ -42,13 +45,17 @@ const updateRepair = async (req, res, next) => {
     address: Joi.string().optional().max(200).trim(),
     repair_type: Joi.string().optional().valid('at_home', 'at_store').max(100).trim(),
     problem_description: Joi.string().optional().max(500).trim(),
-    note: Joi.string().optional().allow('').trim(),
     status: Joi.string().valid('new', 'in_progress', 'completed', 'cancelled').optional(),
-    hidden: Joi.boolean().optional()
+    hidden: Joi.boolean().optional(),
+    images: Joi.array().items({
+      url: Joi.string().uri().required(),
+      public_id: Joi.string().required()
+    }).optional()
   })
   try {
-    const data = req?.body ? req.body : {}
+    const payload = req?.body ? req.body : {}
     const params = req?.params ? req.params : {}
+    const data = { ...payload, id: params.id }
     const validatedParams = await idValidationRule.validateAsync(params, { abortEarly: false })
     const validatedData = await updateRepairRule.validateAsync(data, { abortEarly: false })
     req.body = validatedData
@@ -105,10 +112,23 @@ const getRepairsByStatus = async (req, res, next) => {
   }
 }
 
+const deleteRepair = async (req, res, next) => {
+  try {
+    const params = req?.params ? req.params : {}
+    const validatedParams = await idValidationRule.validateAsync(params, { abortEarly: false })
+    req.params = validatedParams
+    next()
+  }
+  catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
+  }
+}
+
 export const repairValidation = {
   createRepair,
   updateRepair,
   hideRepair,
+  deleteRepair,
   getRepairById,
   getRepairsByService,
   getRepairsByStatus

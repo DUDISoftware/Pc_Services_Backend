@@ -41,6 +41,7 @@ const getAllServices = async (filter = {}) => {
 }
 
 const getServiceById = async (id) => {
+  console.log('Fetching service with ID:', id); // Debug log
   const service = await ServiceModel.findById(id).populate(
     'category_id',
     'name description status'

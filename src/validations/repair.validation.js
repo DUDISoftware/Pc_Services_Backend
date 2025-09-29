@@ -26,7 +26,6 @@ const createRepair = async (req, res, next) => {
   })
   try {
     const data = req?.body ? req.body : {}
-    console.log('Request body for creating repair:', data);
     const validatedData = await createRepairRule.validateAsync(data, { abortEarly: false })
     req.body = validatedData
     next()

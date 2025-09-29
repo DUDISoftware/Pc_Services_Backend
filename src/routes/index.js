@@ -8,6 +8,7 @@ import { serviceRoute } from './service.routes.js'
 import { serviceCategoryRoute } from './serviceCategory.routes.js'
 import { requestRoute } from './request.routes.js'
 import { ratingRoute } from './rating.routes.js'
+import { statsRoute } from './stats.routes.js'
 const Router = express.Router()
 
 Router.get('/status', (req, res) => {
@@ -23,4 +24,5 @@ Router.use('/services', serviceRoute)
 Router.use('/service-categories', serviceCategoryRoute)
 Router.use('/requests', requestRoute)
 Router.use('/ratings', ratingRoute)
+Router.use('/stats', statsRoute)
 export const APIs = Router

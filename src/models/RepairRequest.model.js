@@ -24,14 +24,14 @@ const repairRequestSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
-    unique: true,
+    unique: false,
     trim: true,
     maxlength: 100
   },
   email: {
     type: String,
     required: true,
-    unique: true,
+    unique: false,
     trim: true,
     maxlength: 100
   },

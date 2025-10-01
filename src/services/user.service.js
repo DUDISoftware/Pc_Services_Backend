@@ -2,6 +2,8 @@ import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
 import UserModel from '~/models/User.model.js'
 import { jwtGenerate } from '~/utils/jwt.js'
+import { redisClient } from '~/config/redis.js'
+import sendEmail from '~/utils/sendMail.js'
 
 const generateAndSaveTokens = async (user_id, user_role) => {
   const { accessToken } = jwtGenerate({ id: user_id, role: user_role})
@@ -85,9 +87,28 @@ const deleteUser = async (userId) => {
   return user
 }
 
+const sendOTP = async (email) => {
+  const generateOTP = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString() // Generate a 6-digit OTP
+  }
+  const otp = generateOTP()
+  await redisClient.set(email, otp, 'EX', 300) // Store OTP in Redis with 5 minutes expiration
+  await sendEmail(email, 'Mã xác thực của bạn', `Mã OTP là: ${otp}`)
+}
+
+const verifyEmail = async (email, otp) => {
+  const storedOtp = await redisClient.get(email)
+  if (!storedOtp || storedOtp !== otp) {
+    throw new ApiError(StatusCodes.UNAUTHORIZED, 'OTP không hợp lệ hoặc đã hết hạn')
+  }
+  await redisClient.del(email) // Remove OTP after successful verification
+}
+
 export const userService = {
   login,
   register,
+  sendOTP,
+  verifyEmail,
   getProfile,
   getAllUsers,
   updateUser,

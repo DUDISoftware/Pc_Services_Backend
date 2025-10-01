@@ -78,9 +78,57 @@ const deleteUser = async (req, res, next) => {
   }
 }
 
+const sendEmail = async (req, res, next) => {
+  const sendEmailValidationRule = Joi.object({
+    email: Joi.string().email().required(),
+    subject: Joi.string().required(),
+    text: Joi.string().required()
+  })
+  try {
+    const data = req?.body ? req.body : {}
+    const validatedData = await sendEmailValidationRule.validateAsync(data, { abortEarly: false })
+    req.body = validatedData
+    next()
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
+  }
+}
+
+const sendOTP = async (req, res, next) => {
+  const sendOTPValidationRule = Joi.object({
+    email: Joi.string().email().required()
+  })
+  try {
+    const data = req?.body ? req.body : {}
+    const validatedData = await sendOTPValidationRule.validateAsync(data, { abortEarly: false })
+    req.body = validatedData
+    next()
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
+  }
+}
+
+const verifyEmail = async (req, res, next) => {
+  const verifyEmailValidationRule = Joi.object({
+    email: Joi.string().email().required(),
+    otp: Joi.string().length(6).required()
+  })
+  try {
+    const data = req?.body ? req.body : {}
+    const validatedData = await verifyEmailValidationRule.validateAsync(data, { abortEarly: false })
+    req.body = validatedData
+    next()
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
+  }
+}
+
 export const userValidation = {
   login,
   register,
   updateUser,
+  sendEmail,
+  sendOTP,
+  verifyEmail,
   deleteUser
 }

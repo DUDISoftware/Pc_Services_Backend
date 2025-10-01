@@ -2,6 +2,7 @@ import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
 import ProductModel from '~/models/Product.model'
 import { deleteImage } from '~/utils/cloudinary.js'
+import { redisClient } from '~/config/redis.js'
 
 const createProduct = async (reqBody, files) => {
   const newProductData = {
@@ -30,6 +31,16 @@ const updateProduct = async (id, reqBody, files) => {
   }
 
   const updated = await ProductModel.findByIdAndUpdate(id, updateData, { new: true })
+  if (!updated) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
+  return updated
+}
+
+const updateQuantity = async (id, quantity) => {
+  const updated = await ProductModel.findByIdAndUpdate(
+    id,
+    { quantity },
+    { new: true }
+  )
   if (!updated) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
   return updated
 }
@@ -63,11 +74,36 @@ const getAllProducts = async (page = 1, limit = 10) => {
     products
   }
 }
-const getFeaturedProducts = async (limit = 8) => {
-  return await ProductModel.find({ is_featured: true, status: 'available' })
-    .limit(limit)
-    .sort({ createdAt: -1 });
-}
+
+const getFeaturedProducts = async (limit = 4) => {
+  const keys = [];
+  let cursor = 0;
+
+  do {
+    const reply = await redisClient.scan(String(cursor), {
+      MATCH: 'product:*:views',
+      COUNT: 3,
+    });
+    cursor = String(reply.cursor);
+    keys.push(...reply.keys);
+  } while (String(cursor) !== '0');
+
+  if (keys.length === 0) return [];
+
+  const values = await redisClient.mGet(keys);
+
+  const featured = keys.map((key, i) => {
+    const id = key.split(':')[1];
+    const raw = values[i];
+    return {
+      id: id,
+      views: raw ? parseInt(raw, 10) : 0, // convert từ string về number
+    };
+  });
+  featured.sort((a, b) => b.views - a.views); // sắp xếp giảm dần theo views
+  return featured.slice(0, limit); // lấy top 4
+};
+
 // product.service.js
 const getRelatedProducts = async (productId, limit = 4) => {
   // lấy product hiện tại để biết category
@@ -119,14 +155,30 @@ const getProductBySlug = async (slug) => {
   return product;
 }
 
+const getProductViews = async (id) => {
+  const key = `product:${id}:views`
+  const views = await redisClient.get(key)
+  return views ? parseInt(views, 10) : 0
+}
+
+const countViewRedis = async (id) => {
+  const key = `product:${id}:views`
+  const views = await redisClient.incrBy(key, 1)
+  await redisClient.expire(key, 60 * 60 * 24 * 7) // expire in 1 week
+  return views
+}
+
 export const productService = {
   createProduct,
   updateProduct,
+  updateQuantity,
   deleteProduct,
   getAllProducts,
   getProductById,
   getProductsByCategory,
   getFeaturedProducts,
   getRelatedProducts,
-  getProductBySlug
+  getProductBySlug,
+  getProductViews,
+  countViewRedis
 };

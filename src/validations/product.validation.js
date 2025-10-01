@@ -76,6 +76,23 @@ const updateProduct = async (req, res, next) => {
   }
 }
 
+const updateQuantity = async (req, res, next) => {
+  const updateQuantityRule = Joi.object({
+    quantity: Joi.number().required().min(0)
+  })
+  try {
+    const data = req?.body ? req.body : {}
+    const params = req?.params ? req.params : {}
+    const validatedParams = await idValidationRule.validateAsync(params, { abortEarly: false })
+    const validatedData = await updateQuantityRule.validateAsync(data, { abortEarly: false })
+    req.body = validatedData
+    req.params = validatedParams
+    next()
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
+  }
+}
+
 const deleteProduct = async (req, res, next) => {
   try {
     const params = req?.params ? req.params : {}
@@ -125,6 +142,7 @@ const getProductBySlug = async (req, res, next) => {
 export const productValidation = {
   createProduct,
   updateProduct,
+  updateQuantity,
   deleteProduct,
   getProductBySlug,
   getProductById,

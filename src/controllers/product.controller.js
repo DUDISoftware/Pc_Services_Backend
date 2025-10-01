@@ -47,6 +47,21 @@ const updateProduct = async (req, res, next) => {
   }
 }
 
+const updateQuantity = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const { quantity } = req.body
+    const updatedProduct = await productService.updateQuantity(id, quantity)
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'Cập nhật số lượng product thành công',
+      product: updatedProduct
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 const deleteProduct = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -134,12 +149,32 @@ const searchProducts = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-
 }
+
+const getProductViews = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const views = await productService.getProductViews(id);
+    res.status(StatusCodes.OK).json({ status: 'success', views });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const countViewRedis = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const views = await productService.countViewRedis(id);
+    res.status(StatusCodes.OK).json({ status: 'success', views });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const productController = {
   createProduct,
   updateProduct,
+  updateQuantity,
   deleteProduct,
   getAllProducts,
   getProductById,
@@ -147,5 +182,7 @@ export const productController = {
   getProductBySlug,
   getFeaturedProducts,
   getRelatedProducts,
-  searchProducts
+  searchProducts,
+  getProductViews,
+  countViewRedis
 }

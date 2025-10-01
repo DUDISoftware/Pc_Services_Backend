@@ -16,5 +16,8 @@ Router.post('/', verifyToken, verifyAdmin, serviceValidation.createService, serv
 Router.put('/:id', verifyToken, serviceValidation.updateService, serviceController.updateService)
 Router.patch('/:id/hide', verifyToken, serviceController.hideService)
 Router.delete('/:id', verifyToken, serviceController.deleteService)
+Router.get('/:id/views', serviceController.getServiceViews)
+Router.post('/:id/views', serviceController.countViewRedis)
+Router.get('/featured', serviceController.getFeaturedServices)
 
 export const serviceRoute = Router

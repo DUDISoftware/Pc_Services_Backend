@@ -10,6 +10,7 @@ const Router = express.Router()
 Router.post('/', verifyToken, verifyAdmin, uploadImage.array('images'), productValidation.createProduct, productController.createProduct)
 Router.put('/:id', verifyToken, verifyAdmin, uploadImage.array('images'), productValidation.updateProduct, productController.updateProduct)
 Router.delete('/:id', verifyToken, verifyAdmin, productValidation.deleteProduct, productController.deleteProduct)
+Router.patch('/:id/quantity', verifyToken, verifyAdmin, productValidation.updateQuantity, productController.updateQuantity);
 
 // ✅ GET APIs
 Router.get('/', productController.getAllProducts) // ?page=1&limit=10
@@ -21,6 +22,10 @@ Router.get('/category/:categoryId', productController.getProductsByCategory);
 Router.get('/:id', productController.getProductById)
 // product.route.js
 Router.get('/:id/related', productController.getRelatedProducts);
+
+// Store in Redis
+Router.get('/:id/views', productValidation.getProductById, productController.getProductViews);
+Router.post('/:id/views', productValidation.getProductById, productController.countViewRedis);
 
 
 export const productRoute = Router

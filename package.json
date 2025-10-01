@@ -1,12 +1,14 @@
 {
-  "name": "saigon-di-api",
+  "name": "Linh-Kien-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon --exec babel-node ./src/app.js",
+    "build": "babel src -d dist --copy-files",
     "start": "node server.js",
-    "dev": "nodemon --exec babel-node ./src/app.js"
+    "start:prod": "node dist/app.js"
   },
   "keywords": [],
   "author": "",

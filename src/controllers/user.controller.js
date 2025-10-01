@@ -89,11 +89,55 @@ const deleteUser = async (req, res, next) => {
   }
 }
 
+const sendEmail = async (req, res, next) => {
+  try {
+    const { email, subject, text } = req.body
+    await userService.sendEmail(email, subject, text)
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'Gửi email thành công'
+    })
+  } catch (error) {
+    next(error)
+  } 
+}
+
+const sendOTP = async (req, res, next) => {
+  try {
+    const { email } = req.body
+    await userService.sendOTP(email)
+
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'Gửi mã OTP thành công'
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const verifyEmail = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body
+    await userService.verifyEmail(email, otp)
+
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'Xác thực email thành công'
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const userController = {
   login,
   register,
   getUserById,
   getAllUsers,
+  sendEmail,
+  sendOTP,
+  verifyEmail,
   updateUser,
   deleteUser
 }

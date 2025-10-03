@@ -21,7 +21,8 @@ const login = async (req, res, next) => {
 const register = async (req, res, next) => {
   const registerValidationRule = Joi.object({
     username: Joi.string().required(),
-    password: Joi.string().min(6).required()
+    password: Joi.string().min(6).required(),
+    role: Joi.string().valid('admin', 'staff').optional()
   })
 
   try {

@@ -12,11 +12,11 @@ const createRating = async (req, res, next) => {
     product_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).optional(),
     service_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).optional(),
     name: Joi.string().required().max(100).trim(),
-    rating: Joi.number().required().min(1).max(5),
+    score: Joi.number().required().min(1).max(5),
     comment: Joi.string().optional().allow('').max(1000).trim()
   }).or('product_id', 'service_id')
   try {
-    const data = req?.body ? req.body : {}
+    const data = req?.body ? req.body : {};
     const validatedData = await createRatingRule.validateAsync(data, { abortEarly: false })
     req.body = validatedData
     next()

@@ -4,6 +4,7 @@ import Order from '~/models/OrderRequest.model.js'
 
 const createRequest = async (reqBody) => {
   const newRequest = new Order(reqBody)
+  if (!newRequest) throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid request data')
   await newRequest.save()
   return newRequest
 }

@@ -8,6 +8,7 @@ const Router = express.Router()
 // Public routes (không cần token)
 Router.get('/', serviceController.getAllServices)
 Router.get('/search', serviceController.searchServices)
+Router.get('/featured', serviceController.getFeaturedServices)
 Router.get('/:id', serviceController.getServiceById)
 Router.get('/slug/:slug', serviceValidation.getServiceBySlug, serviceController.getServiceBySlug)
 
@@ -18,6 +19,5 @@ Router.patch('/:id/hide', verifyToken, serviceController.hideService)
 Router.delete('/:id', verifyToken, serviceController.deleteService)
 Router.get('/:id/views', serviceController.getServiceViews)
 Router.post('/:id/views', serviceController.countViewRedis)
-Router.get('/featured', serviceController.getFeaturedServices)
 
 export const serviceRoute = Router

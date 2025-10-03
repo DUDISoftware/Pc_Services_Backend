@@ -4,6 +4,7 @@ import UserModel from '~/models/User.model.js'
 import { jwtGenerate } from '~/utils/jwt.js'
 import { redisClient } from '~/config/redis.js'
 import sendEmail from '~/utils/sendMail.js'
+import { hash } from 'bcrypt'
 
 const generateAndSaveTokens = async (user_id, user_role) => {
   const { accessToken } = jwtGenerate({ id: user_id, role: user_role})
@@ -92,7 +93,8 @@ const sendOTP = async (email) => {
     return Math.floor(100000 + Math.random() * 900000).toString() // Generate a 6-digit OTP
   }
   const otp = generateOTP()
-  await redisClient.set(email, otp, 'EX', 300) // Store OTP in Redis with 5 minutes expiration
+  await redisClient.set(email, otp)
+  await redisClient.expire(email, 300) // OTP expires in 5 minutes
   await sendEmail(email, 'Mã xác thực của bạn', `Mã OTP là: ${otp}`)
 }
 
@@ -101,12 +103,15 @@ const verifyEmail = async (email, otp) => {
   if (!storedOtp || storedOtp !== otp) {
     throw new ApiError(StatusCodes.UNAUTHORIZED, 'OTP không hợp lệ hoặc đã hết hạn')
   }
-  await redisClient.del(email) // Remove OTP after successful verification
+  if (storedOtp === otp) {
+    await redisClient.del(email) // Remove OTP after successful verification
+  }
 }
 
 export const userService = {
   login,
   register,
+  sendEmail,
   sendOTP,
   verifyEmail,
   getProfile,

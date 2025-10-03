@@ -12,7 +12,7 @@ const createRepair = async (req, res, next) => {
     service_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
     name: Joi.string().required().max(200).trim(),
     phone: Joi.string().required().max(15).trim(),
-    email: Joi.string().required().max(100).trim(),
+    email: Joi.string().optional().max(100).trim(),
     address: Joi.string().required().max(200).trim(),
     repair_type: Joi.string().required().valid('at_home', 'at_store').max(100).trim(),
     problem_description: Joi.string().required().max(500).trim(),

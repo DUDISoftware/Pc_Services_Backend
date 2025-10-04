@@ -12,7 +12,8 @@ const createCategory = async (req, res, next) => {
   const createCategoryRule = Joi.object({
     name: Joi.string().max(100).required(),
     description: Joi.string().required(),
-    slug: Joi.string().max(200).required()
+    slug: Joi.string().max(200).required(),
+    tags: Joi.array().items(Joi.string().max(50)).optional()
   })
 
   try {
@@ -29,7 +30,8 @@ const updateCategory = async (req, res, next) => {
   const updateCategoryRule = Joi.object({
     name: Joi.string().max(100).optional(),
     description: Joi.string().optional(),
-    slug: Joi.string().max(200).optional()
+    slug: Joi.string().max(200).optional(),
+    tags: Joi.array().items(Joi.string().max(50)).optional()
   })
 
   try {

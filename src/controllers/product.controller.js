@@ -4,21 +4,21 @@ import { searchService } from '~/services/search.service.js'
 
 const createProduct = async (req, res, next) => {
   try {
-    const files = req.files
+    const files = req.files;
     if (!files) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         status: 'error',
-        message: 'Image files are required. Please send files with field name "images"'
-      })
+        message: 'Image files are required. Please send files with field name "images"',
+      });
     }
-    const product = await productService.createProduct(req.body, files)
+    const product = await productService.createProduct(req.body, files);
     res.status(StatusCodes.CREATED).json({
       status: 'success',
       message: 'Tạo product thành công',
-      product
-    })
+      product,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
 }
 // product.controller.js
@@ -34,16 +34,16 @@ const getRelatedProducts = async (req, res, next) => {
 };
 const updateProduct = async (req, res, next) => {
   try {
-    const { id } = req.params
-    const files = req.files
-    const updatedProduct = await productService.updateProduct(id, req.body, files)
+    const { id } = req.params;
+    const files = req.files;
+    const updatedProduct = await productService.updateProduct(id, req.body, files);
     res.status(StatusCodes.OK).json({
       status: 'success',
       message: 'Cập nhật product thành công',
-      product: updatedProduct
-    })
+      product: updatedProduct,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
 }
 
@@ -62,16 +62,18 @@ const updateQuantity = async (req, res, next) => {
   }
 }
 
-const deleteProduct = async (req, res, next) => {
+const updateQuantity = async (req, res, next) => {
   try {
-    const { id } = req.params
-    await productService.deleteProduct(id)
+    const { id } = req.params;
+    const { quantity } = req.body;
+    const updatedProduct = await productService.updateQuantity(id, quantity);
     res.status(StatusCodes.OK).json({
       status: 'success',
-      message: 'Xoá product thành công'
-    })
+      message: 'Cập nhật số lượng product thành công',
+      product: updatedProduct,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
 }
 // product.controller.js
@@ -82,30 +84,32 @@ const getFeaturedProducts = async (req, res, next) => {
     res.status(StatusCodes.OK).json({ status: 'success', products });
   } catch (error) {
     next(error);
+    next(error);
   }
+};
 };
 
 // ✅ GET all products
 const getAllProducts = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10 } = req.query
-    const data = await productService.getAllProducts(Number(page), Number(limit))
-    res.status(StatusCodes.OK).json(data)
+    const { page = 1, limit = 10 } = req.query;
+    const data = await productService.getAllProducts(Number(page), Number(limit));
+    res.status(StatusCodes.OK).json(data);
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 // ✅ GET product by ID
 const getProductById = async (req, res, next) => {
   try {
-    const { id } = req.params
-    const product = await productService.getProductById(id)
-    res.status(StatusCodes.OK).json({ status: 'success', product })
+    const { id } = req.params;
+    const product = await productService.getProductById(id);
+    res.status(StatusCodes.OK).json({ status: 'success', product });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 // ✅ GET products by category
 const getProductsByCategory = async (req, res, next) => {
@@ -115,9 +119,9 @@ const getProductsByCategory = async (req, res, next) => {
     const data = await productService.getProductsByCategory(categoryId, Number(page), Number(limit))
     res.status(StatusCodes.OK).json(data)
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 const getProductBySlug = async (req, res, next) => {
   try {
@@ -127,17 +131,19 @@ const getProductBySlug = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-}
+};
 
 const searchProducts = async (req, res, next) => {
   try {
     const { query, page = 1, limit = 10 } = req.query;
+    const { query, page = 1, limit = 10 } = req.query;
     if (!query || query.trim() === '') {
       return res.status(StatusCodes.BAD_REQUEST).json({
         status: 'fail',
-        message: 'Query parameter is required'
-      })
+        message: 'Query parameter is required',
+      });
     }
+    const products = await searchService.searchProducts(query, Number(page), Number(limit));
     const products = await searchService.searchProducts(query, Number(page), Number(limit));
     res.status(StatusCodes.OK).json({
       status: 'success',
@@ -148,17 +154,23 @@ const searchProducts = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+    next(error);
   }
-}
+};
 
 const getProductViews = async (req, res, next) => {
   try {
     const { id } = req.params;
     const views = await productService.getProductViews(id);
     res.status(StatusCodes.OK).json({ status: 'success', views });
+    const { id } = req.params;
+    const views = await productService.getProductViews(id);
+    res.status(StatusCodes.OK).json({ status: 'success', views });
   } catch (error) {
     next(error);
+    next(error);
   }
+};
 };
 
 const countViewRedis = async (req, res, next) => {
@@ -166,14 +178,20 @@ const countViewRedis = async (req, res, next) => {
     const { id } = req.params;
     const views = await productService.countViewRedis(id);
     res.status(StatusCodes.OK).json({ status: 'success', views });
+    const { id } = req.params;
+    const views = await productService.countViewRedis(id);
+    res.status(StatusCodes.OK).json({ status: 'success', views });
   } catch (error) {
     next(error);
+    next(error);
   }
+};
 };
 
 export const productController = {
   createProduct,
   updateProduct,
+  updateQuantity,
   updateQuantity,
   deleteProduct,
   getAllProducts,
@@ -184,5 +202,5 @@ export const productController = {
   getRelatedProducts,
   searchProducts,
   getProductViews,
-  countViewRedis
-}
+  countViewRedis,
+};

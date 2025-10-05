@@ -5,29 +5,22 @@ import { deleteImage } from '~/utils/cloudinary.js'
 import { redisClient } from '~/config/redis.js'
 
 const createProduct = async (reqBody, files) => {
-  const newProductData = {
-    ...reqBody,
-    images: files?.map(file => ({
-      url: file.path,
-      public_id: file.filename
-    })) || []
-  }
-  const newProduct = new ProductModel(newProductData)
-  await newProduct.save()
-  return newProduct
-}
+  const images = files?.map(file => ({
+    url: file.path,
+    public_id: file.filename
+  })) || [];
+  const newProduct = new ProductModel({ ...reqBody, images });
+  await newProduct.save();
+  return newProduct;
+};
 
 const updateProduct = async (id, reqBody, files) => {
-  const updateData = {
-    ...reqBody,
-    updatedAt: Date.now()
-  }
-
-  if (files && files.length > 0) {
+  const updateData = { ...reqBody, updatedAt: Date.now() };
+  if (files?.length) {
     updateData.images = files.map(file => ({
       url: file.path,
       public_id: file.filename
-    }))
+    }));
   }
 
   const updated = await ProductModel.findByIdAndUpdate(id, updateData, { new: true })
@@ -46,25 +39,22 @@ const updateQuantity = async (id, quantity) => {
 }
 
 const deleteProduct = async (id) => {
-  const result = await ProductModel.findByIdAndDelete(id)
-  if (!result) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
-
-  if (result.images && result.images.length > 0) {
-    await Promise.all(result.images.map(image => deleteImage(image.public_id)))
+  const result = await ProductModel.findByIdAndDelete(id);
+  if (!result) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
+  if (result.images?.length) {
+    await Promise.all(result.images.map(image => deleteImage(image.public_id)));
   }
-  return result
-}
+  return result;
+};
 
-// ✅ GET all products (with pagination)
 const getAllProducts = async (page = 1, limit = 10) => {
-  const skip = (page - 1) * limit
+  const skip = (page - 1) * limit;
   const products = await ProductModel.find()
     .populate('category_id', 'name slug')
     .skip(skip)
     .limit(limit)
-    .sort({ createdAt: -1 })
-
-  const total = await ProductModel.countDocuments()
+    .sort({ createdAt: -1 });
+  const total = await ProductModel.countDocuments();
   return {
     status: 'success',
     page,
@@ -72,15 +62,15 @@ const getAllProducts = async (page = 1, limit = 10) => {
     total,
     totalPages: Math.ceil(total / limit),
     products
-  }
-}
+  };
+};
 
 const getFeaturedProducts = async (limit = 4) => {
   const keys = [];
   let cursor = 0;
 
   do {
-    const reply = await redisClient.scan(String(cursor), {
+    const reply = await redisClient.scan(cursor, {
       MATCH: 'product:*:views',
       COUNT: 3,
     });
@@ -124,21 +114,19 @@ const getRelatedProducts = async (productId, limit = 4) => {
 
 // ✅ GET product by ID
 const getProductById = async (id) => {
-  const product = await ProductModel.findById(id).populate('category_id', 'name')
-  if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
-  return product
-}
+  const product = await ProductModel.findById(id).populate('category_id', 'name');
+  if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
+  return product;
+};
 
-// ✅ GET products by Category
 const getProductsByCategory = async (categoryId, page = 1, limit = 10) => {
-  const skip = (page - 1) * limit
+  const skip = (page - 1) * limit;
   const products = await ProductModel.find({ category_id: categoryId })
     .populate('category_id', 'name slug')
     .skip(skip)
     .limit(limit)
-    .sort({ createdAt: -1 })
-
-  const total = await ProductModel.countDocuments({ category_id: categoryId })
+    .sort({ createdAt: -1 });
+  const total = await ProductModel.countDocuments({ category_id: categoryId });
   return {
     status: 'success',
     page,
@@ -146,8 +134,8 @@ const getProductsByCategory = async (categoryId, page = 1, limit = 10) => {
     total,
     totalPages: Math.ceil(total / limit),
     products
-  }
-}
+  };
+};
 
 const getProductBySlug = async (slug) => {
   const product = await ProductModel.findOne({ slug }).populate('category_id', 'name slug');
@@ -156,17 +144,17 @@ const getProductBySlug = async (slug) => {
 }
 
 const getProductViews = async (id) => {
-  const key = `product:${id}:views`
-  const views = await redisClient.get(key)
-  return views ? parseInt(views, 10) : 0
-}
+  const key = `product:${id}:views`;
+  const views = await redisClient.get(key);
+  return views ? parseInt(views, 10) : 0;
+};
 
 const countViewRedis = async (id) => {
-  const key = `product:${id}:views`
-  const views = await redisClient.incrBy(key, 1)
-  await redisClient.expire(key, 60 * 60 * 24 * 7) // expire in 1 week
-  return views
-}
+  const key = `product:${id}:views`;
+  const views = await redisClient.incrBy(key, 1);
+  await redisClient.expire(key, 60 * 60 * 24 * 7);
+  return views;
+};
 
 export const productService = {
   createProduct,
@@ -181,4 +169,5 @@ export const productService = {
   getProductBySlug,
   getProductViews,
   countViewRedis
+};
 };

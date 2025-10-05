@@ -1,19 +1,19 @@
 // src/routes/serviceCategory.routes.js
-import express from 'express';
-import { verifyToken } from '~/middlewares/auth.middleware.js';
+import express from 'express'
+import { verifyToken } from '~/middlewares/auth.middleware.js'
 import { serviceCategoryController } from '~/controllers/serviceCategory.controller.js'
 
-const Router = express.Router();
+const router = express.Router()
 
-// Public
-Router.get('/', serviceCategoryController.getAllCategories);
-Router.get('/search', serviceCategoryController.searchCategories);
-Router.get('/:id', serviceCategoryController.getCategoryById);
-Router.get('/slug/:slug', serviceCategoryController.getCategoryBySlug);
+// Public routes
+router.get('/', serviceCategoryController.getAllCategories)
+router.get('/search', serviceCategoryController.searchCategories)
+router.get('/slug/:slug', serviceCategoryController.getCategoryBySlug)
+router.get('/:id', serviceCategoryController.getCategoryById)
 
-// Admin
-Router.post('/', verifyToken, serviceCategoryController.createCategory);
-Router.put('/:id', verifyToken, serviceCategoryController.updateCategory);
-Router.delete('/:id', verifyToken, serviceCategoryController.deleteCategory);
+// Protected admin routes
+router.post('/', verifyToken, serviceCategoryController.createCategory)
+router.put('/:id', verifyToken, serviceCategoryController.updateCategory)
+router.delete('/:id', verifyToken, serviceCategoryController.deleteCategory)
 
-export const serviceCategoryRoute = Router;
+export const serviceCategoryRoute = router

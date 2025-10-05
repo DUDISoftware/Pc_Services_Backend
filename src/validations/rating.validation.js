@@ -7,17 +7,17 @@ const idValidationRule = Joi.object({
   id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required()
 })
 
+const createRatingRule = Joi.object({
+  product_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).optional(),
+  service_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).optional(),
+  name: Joi.string().max(100).trim().required(),
+  score: Joi.number().min(1).max(5).required(),
+  comment: Joi.string().max(1000).trim().optional().allow('')
+}).or('product_id', 'service_id')
+
 const createRating = async (req, res, next) => {
-  const createRatingRule = Joi.object({
-    product_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).optional(),
-    service_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).optional(),
-    name: Joi.string().required().max(100).trim(),
-    score: Joi.number().required().min(1).max(5),
-    comment: Joi.string().optional().allow('').max(1000).trim()
-  }).or('product_id', 'service_id')
   try {
-    const data = req?.body ? req.body : {};
-    const validatedData = await createRatingRule.validateAsync(data, { abortEarly: false })
+    const validatedData = await createRatingRule.validateAsync(req.body || {}, { abortEarly: false })
     req.body = validatedData
     next()
   } catch (error) {
@@ -25,32 +25,9 @@ const createRating = async (req, res, next) => {
   }
 }
 
-const getRatingByProduct = async (req, res, next) => {
+const validateIdParam = async (req, res, next) => {
   try {
-    const params = req?.params ? req.params : {}
-    const validatedParams = await idValidationRule.validateAsync(params, { abortEarly: false })
-    req.params = validatedParams
-    next()
-  } catch (error) {
-    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
-  }
-}
-
-const getRatingByService = async (req, res, next) => {
-  try {
-    const params = req?.params ? req.params : {}
-    const validatedParams = await idValidationRule.validateAsync(params, { abortEarly: false })
-    req.params = validatedParams
-    next()
-  } catch (error) {
-    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
-  }
-}
-
-const deleteRating = async (req, res, next) => {
-  try {
-    const params = req?.params ? req.params : {}
-    const validatedParams = await idValidationRule.validateAsync(params, { abortEarly: false })
+    const validatedParams = await idValidationRule.validateAsync(req.params || {}, { abortEarly: false })
     req.params = validatedParams
     next()
   } catch (error) {
@@ -60,7 +37,7 @@ const deleteRating = async (req, res, next) => {
 
 export const ratingValidation = {
   createRating,
-  getRatingByProduct,
-  getRatingByService,
-  deleteRating
+  getRatingByProduct: validateIdParam,
+  getRatingByService: validateIdParam,
+  deleteRating: validateIdParam
 }

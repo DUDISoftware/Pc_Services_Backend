@@ -7,30 +7,37 @@ import ProductModel from '~/models/Product.model'
  * Create category
  */
 const createCategory = async (reqBody) => {
-  const category = new CategoryModel(reqBody)
-  await category.save()
-  return category
+  try {
+    const category = await CategoryModel.create(reqBody)
+    return category
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
+  }
 }
 
 /**
  * Get all categories with pagination
  */
 const getCategories = async (page = 1, limit = 10) => {
-  page = parseInt(page)
-  limit = parseInt(limit)
-  const skip = (page - 1) * limit
+  try {
+    page = Number(page) || 1
+    limit = Number(limit) || 10
+    const skip = (page - 1) * limit
 
-  const [categories, total] = await Promise.all([
-    CategoryModel.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
-    CategoryModel.countDocuments()
-  ])
+    const [categories, total] = await Promise.all([
+      CategoryModel.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      CategoryModel.countDocuments()
+    ])
 
-  return {
-    page,
-    limit,
-    total,
-    totalPages: Math.ceil(total / limit),
-    categories
+    return {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      categories
+    }
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }
 }
 
@@ -38,53 +45,67 @@ const getCategories = async (page = 1, limit = 10) => {
  * Get category by id
  */
 const getCategoryById = async (id) => {
-  const category = await CategoryModel.findById(id)
-  if (!category) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found')
+  try {
+    const category = await CategoryModel.findById(id)
+    if (!category) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found')
+    }
+    return category
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }
-  return category
 }
 
+/**
+ * Get category by slug
+ */
 const getCategoryBySlug = async (slug) => {
-  const category = await CategoryModel.findOne({ slug })
-  if (!category) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found')
+  try {
+    const category = await CategoryModel.findOne({ slug })
+    if (!category) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found')
+    }
+    return category
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }
-  return category
 }
 
 /**
  * Update category
  */
 const updateCategory = async (id, reqBody) => {
-  const updateData = {
-    ...reqBody,
-    updatedAt: Date.now()
+  try {
+    reqBody.updatedAt = Date.now()
+    const category = await CategoryModel.findByIdAndUpdate(id, reqBody, { new: true })
+    if (!category) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found')
+    }
+    return category
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }
-
-  const category = await CategoryModel.findByIdAndUpdate(id, updateData, { new: true })
-  if (!category) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found')
-  }
-  return category
 }
 
 /**
- * Delete category + detach products
+ * Delete category and detach products
  */
 const deleteCategory = async (id) => {
-  const deletedCategory = await CategoryModel.findByIdAndDelete(id)
-  if (!deletedCategory) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found')
+  try {
+    const deletedCategory = await CategoryModel.findByIdAndDelete(id)
+    if (!deletedCategory) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found')
+    }
+
+    await ProductModel.updateMany(
+      { category_id: id },
+      { $set: { category_id: null } }
+    )
+
+    return deletedCategory
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }
-
-  // Gỡ liên kết category ở product thay vì xóa product
-  await ProductModel.updateMany(
-    { category_id: id },
-    { $set: { category_id: null } }
-  )
-
-  return deletedCategory
 }
 
 export const categoryService = {

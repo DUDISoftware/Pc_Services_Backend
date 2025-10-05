@@ -8,21 +8,20 @@ const createProduct = async (reqBody, files) => {
   const images = files?.map(file => ({
     url: file.path,
     public_id: file.filename
-  })) || [];
-  const newProduct = new ProductModel({ ...reqBody, images });
-  await newProduct.save();
-  return newProduct;
-};
+  })) || []
+  const newProduct = new ProductModel({ ...reqBody, images })
+  await newProduct.save()
+  return newProduct
+}
 
 const updateProduct = async (id, reqBody, files) => {
-  const updateData = { ...reqBody, updatedAt: Date.now() };
+  const updateData = { ...reqBody, updatedAt: Date.now() }
   if (files?.length) {
     updateData.images = files.map(file => ({
       url: file.path,
       public_id: file.filename
-    }));
+    }))
   }
-
   const updated = await ProductModel.findByIdAndUpdate(id, updateData, { new: true })
   if (!updated) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
   return updated
@@ -39,22 +38,22 @@ const updateQuantity = async (id, quantity) => {
 }
 
 const deleteProduct = async (id) => {
-  const result = await ProductModel.findByIdAndDelete(id);
-  if (!result) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
+  const result = await ProductModel.findByIdAndDelete(id)
+  if (!result) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
   if (result.images?.length) {
-    await Promise.all(result.images.map(image => deleteImage(image.public_id)));
+    await Promise.all(result.images.map(image => deleteImage(image.public_id)))
   }
-  return result;
-};
+  return result
+}
 
 const getAllProducts = async (page = 1, limit = 10) => {
-  const skip = (page - 1) * limit;
+  const skip = (page - 1) * limit
   const products = await ProductModel.find()
     .populate('category_id', 'name slug')
     .skip(skip)
     .limit(limit)
-    .sort({ createdAt: -1 });
-  const total = await ProductModel.countDocuments();
+    .sort({ createdAt: -1 })
+  const total = await ProductModel.countDocuments()
   return {
     status: 'success',
     page,
@@ -62,71 +61,61 @@ const getAllProducts = async (page = 1, limit = 10) => {
     total,
     totalPages: Math.ceil(total / limit),
     products
-  };
-};
+  }
+}
 
 const getFeaturedProducts = async (limit = 4) => {
-  const keys = [];
-  let cursor = 0;
-
+  const keys = []
+  let cursor = '0'
   do {
     const reply = await redisClient.scan(cursor, {
       MATCH: 'product:*:views',
-      COUNT: 3,
-    });
-    cursor = String(reply.cursor);
-    keys.push(...reply.keys);
-  } while (String(cursor) !== '0');
-
-  if (keys.length === 0) return [];
-
-  const values = await redisClient.mGet(keys);
-
+      COUNT: 100
+    })
+    cursor = reply.cursor
+    keys.push(...reply.keys)
+  } while (cursor !== '0')
+  if (keys.length === 0) return []
+  const values = await redisClient.mGet(keys)
   const featured = keys.map((key, i) => {
-    const id = key.split(':')[1];
-    const raw = values[i];
+    const id = key.split(':')[1]
+    const raw = values[i]
     return {
-      id: id,
-      views: raw ? parseInt(raw, 10) : 0, // convert từ string về number
-    };
-  });
-  featured.sort((a, b) => b.views - a.views); // sắp xếp giảm dần theo views
-  return featured.slice(0, limit); // lấy top 4
-};
+      id,
+      views: raw ? parseInt(raw, 10) : 0
+    }
+  })
+  featured.sort((a, b) => b.views - a.views)
+  return featured.slice(0, limit)
+}
 
-// product.service.js
 const getRelatedProducts = async (productId, limit = 4) => {
-  // lấy product hiện tại để biết category
-  const product = await ProductModel.findById(productId);
-  if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
-
-  // tìm sản phẩm cùng category, khác id hiện tại
+  const product = await ProductModel.findById(productId)
+  if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
   const related = await ProductModel.find({
     category_id: product.category_id,
     _id: { $ne: productId },
     status: 'available'
   })
     .limit(limit)
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+  return related
+}
 
-  return related;
-};
-
-// ✅ GET product by ID
 const getProductById = async (id) => {
-  const product = await ProductModel.findById(id).populate('category_id', 'name');
-  if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
-  return product;
-};
+  const product = await ProductModel.findById(id).populate('category_id', 'name')
+  if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
+  return product
+}
 
 const getProductsByCategory = async (categoryId, page = 1, limit = 10) => {
-  const skip = (page - 1) * limit;
+  const skip = (page - 1) * limit
   const products = await ProductModel.find({ category_id: categoryId })
     .populate('category_id', 'name slug')
     .skip(skip)
     .limit(limit)
-    .sort({ createdAt: -1 });
-  const total = await ProductModel.countDocuments({ category_id: categoryId });
+    .sort({ createdAt: -1 })
+  const total = await ProductModel.countDocuments({ category_id: categoryId })
   return {
     status: 'success',
     page,
@@ -134,27 +123,27 @@ const getProductsByCategory = async (categoryId, page = 1, limit = 10) => {
     total,
     totalPages: Math.ceil(total / limit),
     products
-  };
-};
+  }
+}
 
 const getProductBySlug = async (slug) => {
-  const product = await ProductModel.findOne({ slug }).populate('category_id', 'name slug');
-  if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found');
-  return product;
+  const product = await ProductModel.findOne({ slug }).populate('category_id', 'name slug')
+  if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
+  return product
 }
 
 const getProductViews = async (id) => {
-  const key = `product:${id}:views`;
-  const views = await redisClient.get(key);
-  return views ? parseInt(views, 10) : 0;
-};
+  const key = `product:${id}:views`
+  const views = await redisClient.get(key)
+  return views ? parseInt(views, 10) : 0
+}
 
 const countViewRedis = async (id) => {
-  const key = `product:${id}:views`;
-  const views = await redisClient.incrBy(key, 1);
-  await redisClient.expire(key, 60 * 60 * 24 * 7);
-  return views;
-};
+  const key = `product:${id}:views`
+  const views = await redisClient.incrBy(key, 1)
+  await redisClient.expire(key, 60 * 60 * 24 * 7)
+  return views
+}
 
 export const productService = {
   createProduct,
@@ -169,5 +158,4 @@ export const productService = {
   getProductBySlug,
   getProductViews,
   countViewRedis
-};
-};
+}

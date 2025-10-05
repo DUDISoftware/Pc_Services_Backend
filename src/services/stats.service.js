@@ -2,12 +2,17 @@ import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
 import StatsModel from '~/models/Stats.model'
 
+function getDayRange(date) {
+  const d = new Date(date)
+  const start = new Date(d.setHours(0, 0, 0, 0))
+  const end = new Date(d.setHours(23, 59, 59, 999))
+  return { start, end }
+}
+
 const createStats = async (date) => {
+  const { start, end } = getDayRange(date)
   const exists = await StatsModel.findOne({
-    createdAt: {
-      $gte: new Date(date.setHours(0, 0, 0, 0)),
-      $lte: new Date(date.setHours(23, 59, 59, 999))
-    }
+    createdAt: { $gte: start, $lte: end }
   })
 
   if (exists) {
@@ -20,7 +25,7 @@ const createStats = async (date) => {
     total_orders: 0,
     total_repairs: 0,
     total_products: 0,
-    createdAt: date
+    createdAt: start
   })
 
   await stats.save()
@@ -28,9 +33,7 @@ const createStats = async (date) => {
 }
 
 const getStats = async (date) => {
-  const start = new Date(date.setHours(0, 0, 0, 0))
-  const end = new Date(date.setHours(23, 59, 59, 999))
-
+  const { start, end } = getDayRange(date)
   const stats = await StatsModel.findOne({
     createdAt: { $gte: start, $lte: end }
   }).sort({ createdAt: -1 })
@@ -51,7 +54,7 @@ const getAll = async () => {
 }
 
 const getByMonth = async (month, year) => {
-  const start = new Date(year, month - 1, 1)
+  const start = new Date(year, month - 1, 1, 0, 0, 0, 0)
   const end = new Date(year, month, 0, 23, 59, 59, 999)
   const stats = await StatsModel.find({
     createdAt: { $gte: start, $lte: end }
@@ -63,9 +66,7 @@ const getByMonth = async (month, year) => {
 }
 
 const updateStats = async (reqBody, date) => {
-  const start = new Date(date.setHours(0, 0, 0, 0))
-  const end = new Date(date.setHours(23, 59, 59, 999))
-
+  const { start, end } = getDayRange(date)
   const stats = await StatsModel.findOne({
     createdAt: { $gte: start, $lte: end }
   }).sort({ createdAt: -1 })
@@ -74,24 +75,25 @@ const updateStats = async (reqBody, date) => {
     throw new ApiError(StatusCodes.NOT_FOUND, 'No stats found to update')
   }
 
-  stats.total_profit = parseFloat(reqBody.total_profit || stats.total_profit)
-  stats.total_repairs = parseInt(reqBody.total_repairs || stats.total_repairs)
-  stats.total_orders = parseInt(reqBody.total_orders || stats.total_orders)
-  stats.total_products = parseInt(reqBody.total_products || stats.total_products)
-
-  // stats.total_profit += parseFloat(reqBody.total_profit || 0)
-  // stats.total_repairs += parseInt(reqBody.total_repairs || 0)
-  // stats.total_orders += parseInt(reqBody.total_orders || 0)
-  // stats.total_products += parseInt(reqBody.total_products || 0)
+  stats.total_profit = reqBody.total_profit !== undefined
+    ? parseFloat(reqBody.total_profit)
+    : stats.total_profit
+  stats.total_repairs = reqBody.total_repairs !== undefined
+    ? parseInt(reqBody.total_repairs)
+    : stats.total_repairs
+  stats.total_orders = reqBody.total_orders !== undefined
+    ? parseInt(reqBody.total_orders)
+    : stats.total_orders
+  stats.total_products = reqBody.total_products !== undefined
+    ? parseInt(reqBody.total_products)
+    : stats.total_products
 
   await stats.save()
   return stats
 }
 
 const countVisit = async (date) => {
-  const start = new Date(date.setHours(0, 0, 0, 0))
-  const end = new Date(date.setHours(23, 59, 59, 999))
-
+  const { start, end } = getDayRange(date)
   const stats = await StatsModel.findOne({
     createdAt: { $gte: start, $lte: end }
   }).sort({ createdAt: -1 })

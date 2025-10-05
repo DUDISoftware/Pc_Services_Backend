@@ -1,14 +1,15 @@
+/* eslint-disable no-console */
 import express from 'express'
-import { orderController } from '~/controllers/orderRequest.controller';
-import { orderValidation } from '~/validations/order.validation';
-import { repairController } from '~/controllers/repairRequest.controller';
-import { repairValidation } from '~/validations/repair.validation';
+import { orderController } from '~/controllers/orderRequest.controller'
+import { orderValidation } from '~/validations/order.validation'
+import { repairController } from '~/controllers/repairRequest.controller'
+import { repairValidation } from '~/validations/repair.validation'
 import { verifyToken, verifyAdmin } from '~/middlewares/auth.middleware.js'
-import { searchService } from '~/services/search.service';
+import { searchService } from '~/services/search.service'
 import { uploadImage } from '~/middlewares/upload.middleware.js'
 
-
 const Router = express.Router()
+
 // Order Requests
 Router.post('/orders', orderValidation.createOrder, orderController.createRequest)
 Router.put('/orders/:id', verifyToken, verifyAdmin, orderValidation.updateOrder, orderController.updateRequest)
@@ -31,15 +32,16 @@ Router.get('/repairs/service/:serviceId', verifyToken, verifyAdmin, repairValida
 Router.get('/repairs/status/:status', verifyToken, verifyAdmin, repairValidation.getRepairsByStatus, repairController.getRequestsByStatus)
 Router.get('/repairs/search', verifyToken, verifyAdmin, repairController.searchRequests) // ?query=abc&page=1&limit=10
 
+// General Search
 Router.get('/search', async (req, res) => {
-  const { query, page = 1, limit = 10 } = req.query;
+  const { query, page = 1, limit = 10 } = req.query
   try {
-    const results = await searchService.searchRequests(query, { page, limit });
-    res.json(results);
+    const results = await searchService.searchRequests(query, { page, limit })
+    res.json(results)
   } catch (error) {
-    console.error('❌ Lỗi khi tìm kiếm:', error);
-    res.status(500).json({ error: 'Lỗi khi tìm kiếm' });
+    console.error('❌ Error during search:', error)
+    res.status(500).json({ error: 'Error during search' })
   }
-});
+})
 
 export const requestRoute = Router

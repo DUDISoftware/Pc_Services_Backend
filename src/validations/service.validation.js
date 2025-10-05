@@ -10,51 +10,54 @@ const idValidationRule = Joi.object({
   id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
 })
 
-// src/validations/service.validation.js
+/**
+ * Rule validate Slug
+ */
+const slugValidationRule = Joi.object({
+  slug: Joi.string().max(100).required()
+})
+
+/**
+ * Rule validate Service Body
+ */
+const serviceBodySchema = Joi.object({
+  name: Joi.string().max(100).required(),
+  description: Joi.string().max(2000).required(),
+  price: Joi.number().positive().required(),
+  type: Joi.string().valid('at_home', 'at_store').default('at_store'),
+  estimated_time: Joi.string().max(50).required(),
+  status: Joi.string().valid('active', 'inactive', 'hidden').default('active'),
+  category_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
+  slug: Joi.string().max(100).required()
+})
+
+/**
+ * CREATE service
+ */
 const createService = async (req, res, next) => {
-  const schema = Joi.object({
-    name: Joi.string().max(100).required(),
-    description: Joi.string().max(2000).required(),
-    price: Joi.number().positive().required(),
-    type: Joi.string().valid('at_home', 'at_store').default('at_store'),
-    estimated_time: Joi.string().max(50).required(),
-    status: Joi.string().valid('active', 'inactive', 'hidden').default('active'),
-    category_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(), // ✅ bắt buộc có category
-    slug: Joi.string().max(100).required()
-  });
-
   try {
-    const validated = await schema.validateAsync(req.body || {}, { abortEarly: false });
-    req.body = validated;
-    next();
+    const validated = await serviceBodySchema.validateAsync(req.body || {}, { abortEarly: false })
+    req.body = validated
+    next()
   } catch (error) {
-    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message));
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
   }
-};
+}
 
+/**
+ * UPDATE service
+ */
 const updateService = async (req, res, next) => {
-  const schema = Joi.object({
-    name: Joi.string().max(100).required(),
-    description: Joi.string().max(2000).required(),
-    price: Joi.number().positive().required(),
-    type: Joi.string().valid('at_home', 'at_store').default('at_store'),
-    estimated_time: Joi.string().max(50).required(),
-    status: Joi.string().valid('active', 'inactive', 'hidden').default('active'),
-    category_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(), // ✅ bắt buộc có category
-    slug: Joi.string().max(100).required()
-  });
-
   try {
-    const validatedParams = await idValidationRule.validateAsync(req.params || {}, { abortEarly: false });
-    const validatedBody = await schema.validateAsync(req.body || {}, { abortEarly: false });
-
-    req.params = validatedParams;
-    req.body = validatedBody;
-    next();
+    const validatedParams = await idValidationRule.validateAsync(req.params || {}, { abortEarly: false })
+    const validatedBody = await serviceBodySchema.validateAsync(req.body || {}, { abortEarly: false })
+    req.params = validatedParams
+    req.body = validatedBody
+    next()
   } catch (error) {
-    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message));
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
   }
-};
+}
 
 /**
  * HIDE service (chỉ cần id)
@@ -82,17 +85,16 @@ const getServiceById = async (req, res, next) => {
   }
 }
 
+/**
+ * GET service by slug
+ */
 const getServiceBySlug = async (req, res, next) => {
-  const slugValidationRule = Joi.object({
-    slug: Joi.string().max(100).required()
-  });
   try {
-    const validatedParams = await slugValidationRule.validateAsync(req.params || {}, { abortEarly: false });
-    req.params = validatedParams;
-    next();
-  }
-  catch (error) {
-    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message));
+    const validatedParams = await slugValidationRule.validateAsync(req.params || {}, { abortEarly: false })
+    req.params = validatedParams
+    next()
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
   }
 }
 

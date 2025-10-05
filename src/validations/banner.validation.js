@@ -3,10 +3,12 @@ import { StatusCodes } from 'http-status-codes'
 import ApiError from '~/utils/ApiError.js'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators.js'
 
+// Common ID validation rule
 const idValidationRule = Joi.object({
   id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
 })
 
+// Create Banner Validation
 const createBanner = async (req, res, next) => {
   const createBannerRule = Joi.object({
     title: Joi.string().max(200).required(),
@@ -17,16 +19,17 @@ const createBanner = async (req, res, next) => {
     size: Joi.string().valid('large', 'small').optional(),
     image: Joi.any().optional()
   })
+
   try {
     const data = req.body || {}
-    const validatedData = await createBannerRule.validateAsync(data, { abortEarly: false })
-    req.body = validatedData
+    req.body = await createBannerRule.validateAsync(data, { abortEarly: false })
     next()
   } catch (error) {
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
   }
 }
 
+// Update Banner Validation
 const updateBanner = async (req, res, next) => {
   const updateBannerRule = Joi.object({
     title: Joi.string().optional(),
@@ -36,21 +39,20 @@ const updateBanner = async (req, res, next) => {
     layout: Joi.number().valid(1, 2, 3).optional(),
     size: Joi.string().valid('large', 'small').optional()
   })
+
   try {
-    const data = req.body || {}
-    const params = req.params || {}
-    req.params = await idValidationRule.validateAsync(params, { abortEarly: false })
-    req.body = await updateBannerRule.validateAsync(data, { abortEarly: false })
+    req.params = await idValidationRule.validateAsync(req.params || {}, { abortEarly: false })
+    req.body = await updateBannerRule.validateAsync(req.body || {}, { abortEarly: false })
     next()
   } catch (error) {
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
   }
 }
 
+// Delete Banner Validation
 const deleteBanner = async (req, res, next) => {
   try {
-    const params = req.params || {}
-    req.params = await idValidationRule.validateAsync(params, { abortEarly: false })
+    req.params = await idValidationRule.validateAsync(req.params || {}, { abortEarly: false })
     next()
   } catch (error) {
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))

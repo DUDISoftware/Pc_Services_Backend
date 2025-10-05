@@ -4,76 +4,75 @@ import InfoModel from '~/models/Info.model.js'
 import sendMail from '~/utils/sendMail'
 
 const extractFiles = (filesObject) => {
-  const collected = []
-
-  if (filesObject?.terms?.[0]) {
-    collected.push({
-      url: filesObject.terms[0].path,
-      filename: filesObject.terms[0].filename,
-    })
-  }
-
-  if (filesObject?.policy?.[0]) {
-    collected.push({
-      url: filesObject.policy[0].path,
-      filename: filesObject.policy[0].filename,
-    })
-  }
-
+  const collected = [];
+  ['terms', 'policy'].forEach((key) => {
+    if (filesObject?.[key]?.[0]) {
+      collected.push({
+        url: filesObject[key][0].path,
+        filename: filesObject[key][0].filename
+      })
+    }
+  })
   return collected
 }
 
 const create = async (reqBody, filesObject) => {
-  const termsUrl = filesObject?.terms?.[0]?.path
-  const policyUrl = filesObject?.policy?.[0]?.path
-
-  const info = new InfoModel({
-    ...reqBody,
-    terms: termsUrl,
-    policy: policyUrl
-  })
-
-  await info.save()
-  return info
+  try {
+    const info = new InfoModel({
+      ...reqBody,
+      terms: filesObject?.terms?.[0]?.path || '',
+      policy: filesObject?.policy?.[0]?.path || ''
+    })
+    await info.save()
+    return info
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
+  }
 }
 
-
 const get = async () => {
-  const info = await InfoModel.findOne()
-  if (!info) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Info not found')
+  try {
+    const info = await InfoModel.findOne()
+    if (!info) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Info not found')
+    }
+    return info
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }
-  return info
 }
 
 const update = async (reqBody, filesObject) => {
-  const updateData = {
-    ...reqBody,
-    updatedAt: Date.now()
+  try {
+    const updateData = {
+      ...reqBody,
+      updatedAt: Date.now()
+    }
+
+    if (filesObject?.terms?.[0]?.path) {
+      updateData.terms = filesObject.terms[0].path
+    }
+    if (filesObject?.policy?.[0]?.path) {
+      updateData.policy = filesObject.policy[0].path
+    }
+
+    let info = await InfoModel.findOneAndUpdate({}, updateData, { new: true })
+    if (!info) {
+      info = await create(reqBody, filesObject)
+    }
+    return info
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }
-
-  if (filesObject?.terms?.[0]) {
-    updateData.terms = filesObject.terms[0].path
-  }
-
-  if (filesObject?.policy?.[0]) {
-    updateData.policy = filesObject.policy[0].path
-  }
-
-  const info = await InfoModel.findOneAndUpdate({}, updateData, { new: true })
-
-  if (!info) {
-    return await create(reqBody, filesObject)
-  }
-
-  return info
 }
 
 const sendEmail = async (email, subject, message) => {
-  sendMail(email, subject, message)
-  return;
+  try {
+    await sendMail(email, subject, message)
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
+  }
 }
-
 
 export const infoService = {
   create,

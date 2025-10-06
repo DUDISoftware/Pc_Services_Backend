@@ -4,7 +4,7 @@ import { searchRequests as searchService } from '~/services/search.service.js'
 
 const createRequest = async (req, res, next) => {
   try {
-    const request = await repairService.createRequest(req.body)
+    const request = await repairService.createRequest(req.body, req.files)
     res.status(StatusCodes.CREATED).json({
       status: 'success',
       message: 'Tạo yêu cầu thành công',
@@ -18,7 +18,7 @@ const createRequest = async (req, res, next) => {
 const updateRequest = async (req, res, next) => {
   try {
     const { id } = req.params
-    const updatedRequest = await repairService.updateRequest(id, req.body)
+    const updatedRequest = await repairService.updateRequest(id, req.body, req.files)
     res.status(StatusCodes.OK).json({
       status: 'success',
       message: 'Cập nhật yêu cầu thành công',
@@ -116,10 +116,24 @@ const getRequestsByStatus = async (req, res, next) => {
   }
 }
 
+const deleteRequest = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    await repairService.deleteRequest(id)
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'Xóa yêu cầu thành công'
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const repairController = {
   createRequest,
   updateRequest,
   hideRequest,
+  deleteRequest,
   getAllRequests,
   getRequestById,
   searchRequests,

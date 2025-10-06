@@ -5,7 +5,7 @@ import { StatusCodes } from 'http-status-codes'
 
 const jwtGenerate = (payload) => {
   const accessToken = jwt.sign(payload, env.JWT_SECRET, {
-    expiresIn: env.JWT_EXPIRES_IN || '1h'
+    expiresIn: env.JWT_EXPIRES_IN || '24h'
   })
   // const refreshToken = jwt.sign(payload, env.JWT_REFRESH_SECRET, {
   //   expiresIn: env.JWT_REFRESH_EXPIRES_IN || '30d'
@@ -18,7 +18,7 @@ const requestNewToken = async (refreshToken) => {
   try {
     const decoded = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET)
     const newTokens = jwt.sign({ id: decoded.id, email: decoded.email, role: decoded.role }, env.JWT_SECRET, {
-      expiresIn: env.JWT_EXPIRES_IN || '1h'
+      expiresIn: env.JWT_EXPIRES_IN || '24h'
     })
     return newTokens
   } catch (error) {

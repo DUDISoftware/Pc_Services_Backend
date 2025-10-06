@@ -21,17 +21,18 @@ const createProduct = async (req, res, next) => {
     next(error)
   }
 }
-// product.controller.js
+
 const getRelatedProducts = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const { limit = 4 } = req.query;
-    const products = await productService.getRelatedProducts(id, Number(limit));
-    res.status(StatusCodes.OK).json({ status: 'success', products });
+    const { id } = req.params
+    const { limit = 4 } = req.query
+    const products = await productService.getRelatedProducts(id, Number(limit))
+    res.status(StatusCodes.OK).json({ status: 'success', products })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
+
 const updateProduct = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -47,30 +48,31 @@ const updateProduct = async (req, res, next) => {
   }
 }
 
-const deleteProduct = async (req, res, next) => {
+const updateQuantity = async (req, res, next) => {
   try {
     const { id } = req.params
-    await productService.deleteProduct(id)
+    const { quantity } = req.body
+    const updatedProduct = await productService.updateQuantity(id, quantity)
     res.status(StatusCodes.OK).json({
       status: 'success',
-      message: 'Xoá product thành công'
+      message: 'Cập nhật số lượng product thành công',
+      product: updatedProduct
     })
   } catch (error) {
     next(error)
   }
 }
-// product.controller.js
+
 const getFeaturedProducts = async (req, res, next) => {
   try {
-    const { limit = 8 } = req.query;
-    const products = await productService.getFeaturedProducts(Number(limit));
-    res.status(StatusCodes.OK).json({ status: 'success', products });
+    const { limit = 8 } = req.query
+    const products = await productService.getFeaturedProducts(Number(limit))
+    res.status(StatusCodes.OK).json({ status: 'success', products })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
-// ✅ GET all products
 const getAllProducts = async (req, res, next) => {
   try {
     const { page = 1, limit = 10 } = req.query
@@ -81,7 +83,6 @@ const getAllProducts = async (req, res, next) => {
   }
 }
 
-// ✅ GET product by ID
 const getProductById = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -92,7 +93,6 @@ const getProductById = async (req, res, next) => {
   }
 }
 
-// ✅ GET products by category
 const getProductsByCategory = async (req, res, next) => {
   try {
     const { categoryId } = req.params
@@ -106,40 +106,74 @@ const getProductsByCategory = async (req, res, next) => {
 
 const getProductBySlug = async (req, res, next) => {
   try {
-    const { slug } = req.params;
-    const product = await productService.getProductBySlug(slug);
-    res.status(StatusCodes.OK).json({ status: 'success', product });
+    const { slug } = req.params
+    const product = await productService.getProductBySlug(slug)
+    res.status(StatusCodes.OK).json({ status: 'success', product })
   } catch (error) {
-    next(error);
+    next(error)
   }
 }
 
 const searchProducts = async (req, res, next) => {
   try {
-    const { query, page = 1, limit = 10 } = req.query;
+    const { query, page = 1, limit = 10 } = req.query
     if (!query || query.trim() === '') {
       return res.status(StatusCodes.BAD_REQUEST).json({
         status: 'fail',
         message: 'Query parameter is required'
       })
     }
-    const products = await searchService.searchProducts(query, Number(page), Number(limit));
+    const products = await searchService.searchProducts(query, Number(page), Number(limit))
     res.status(StatusCodes.OK).json({
       status: 'success',
       page: Number(page),
       limit: Number(limit),
       results: products.length,
       products
-    });
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
+}
 
+const getProductViews = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const views = await productService.getProductViews(id)
+    res.status(StatusCodes.OK).json({ status: 'success', views })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const countViewRedis = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const views = await productService.countViewRedis(id)
+    res.status(StatusCodes.OK).json({ status: 'success', views })
+  } catch (error) {
+    next(error)
+  }
+}
+
+// You should implement deleteProduct if you want to export it
+const deleteProduct = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    await productService.deleteProduct(id)
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'Xóa product thành công'
+    })
+  } catch (error) {
+    next(error)
+  }
 }
 
 export const productController = {
   createProduct,
   updateProduct,
+  updateQuantity,
   deleteProduct,
   getAllProducts,
   getProductById,
@@ -147,5 +181,7 @@ export const productController = {
   getProductBySlug,
   getFeaturedProducts,
   getRelatedProducts,
-  searchProducts
+  searchProducts,
+  getProductViews,
+  countViewRedis
 }

@@ -5,16 +5,19 @@ import { serviceValidation } from '~/validations/service.validation.js'
 
 const Router = express.Router()
 
-// Public routes (không cần token)
+// Public routes (no token required)
 Router.get('/', serviceController.getAllServices)
 Router.get('/search', serviceController.searchServices)
-Router.get('/:id', serviceController.getServiceById)
+Router.get('/featured', serviceController.getFeaturedServices)
 Router.get('/slug/:slug', serviceValidation.getServiceBySlug, serviceController.getServiceBySlug)
+Router.get('/:id', serviceController.getServiceById)
+Router.get('/:id/views', serviceController.getServiceViews)
 
-// Admin routes (cần token)
+// Admin routes (token required)
 Router.post('/', verifyToken, verifyAdmin, serviceValidation.createService, serviceController.createService)
 Router.put('/:id', verifyToken, serviceValidation.updateService, serviceController.updateService)
 Router.patch('/:id/hide', verifyToken, serviceController.hideService)
 Router.delete('/:id', verifyToken, serviceController.deleteService)
+Router.post('/:id/views', serviceController.countViewRedis)
 
 export const serviceRoute = Router

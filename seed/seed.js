@@ -4,29 +4,31 @@ import UserModel from '../src/models/User.model.js';
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcryptjs';
 
-dotenv.config({ path: '.env.example' });
+dotenv.config({ path: '.env' });
 
 const connectDB = async () => {
-  await mongoose.connect(process.env.MONGODB_URI);
+  console.log(process.env.MONGODB_URI);
+  await mongoose.connect(process.env.MONGODB_URI, { dbName: process.env.DATABASE_NAME });
   console.log('✅ Connected to MongoDB');
 };
 
 const seed = async () => {
   await connectDB();
 
-  await Promise.all([
-    UserModel.deleteMany(),
-  ]);
+  // await Promise.all([
+  //   UserModel.deleteMany(),
+  // ]);
 
   const salt = await bcrypt.genSalt(10);
-  const userDocs = await UserModel.insertMany(
-    [...Array(10)].map(() => ({
-      username: faker.internet.username(),
-      password: bcrypt.hashSync('123456', salt),
-      role: faker.helpers.arrayElement(['admin', 'staff']),
-      status: faker.helpers.arrayElement(['active', 'locked']),
-    }))
+  const userDocs = await UserModel.insertOne(
+    new UserModel({
+      username: 'root',
+      password: '123456',
+      role: 'admin',
+      status: 'active',
+    })
   );
+
 
   console.log('✅ Seed thành công!');
   process.exit(0);

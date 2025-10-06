@@ -8,7 +8,7 @@ const Router = express.Router()
 
 Router.get('/', bannerController.getAllBanners)
 Router.post('/',
-  // verifyToken, verifyAdmin,
+  verifyToken, verifyAdmin,
   uploadImage.single('image'),
   bannerValidation.createBanner,
   bannerController.createBanner

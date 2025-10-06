@@ -24,14 +24,14 @@ const repairRequestSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
-    unique: true,
+    unique: false,
     trim: true,
     maxlength: 100
   },
   email: {
     type: String,
-    required: true,
-    unique: true,
+    required: false,
+    unique: false,
     trim: true,
     maxlength: 100
   },
@@ -67,7 +67,10 @@ const repairRequestSchema = new mongoose.Schema({
     default: false,
     required: false
   },
-  images: [{ type: String, required: false }],
+  images: {
+    type: [Object],
+    default: []
+  }
 }, schemaOptions );
 
 repairRequestSchema.index({

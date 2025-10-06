@@ -1,148 +1,168 @@
+/* eslint-disable no-console */
 import ProductModel from '~/models/Product.model'
 import CategoryModel from '~/models/Category.model'
 import ServiceModel from '~/models/Service.model'
 import ServiceCategoryModel from '~/models/ServiceCategory.model'
 import Repair from '~/models/RepairRequest.model.js'
 import Order from '~/models/OrderRequest.model.js'
-// import UserModel from '~/models/User.model'
-
 import { redisClient } from '~/config/redis.js'
 
-async function searchInRedis(type, query) {
-  const cacheKey = `search:${type}:${query}`;
-  const cachedResults = await redisClient.get(cacheKey);
-  if (cachedResults) {
-    return JSON.parse(cachedResults);
+const CACHE_EXPIRE_SECONDS = 3 * 3600 // 3 hours
+
+async function getCachedResults(type, query, page, limit) {
+  const cacheKey = `search:${type}:${query}:${page}:${limit}`
+  try {
+    const cached = await redisClient.get(cacheKey)
+    return cached ? JSON.parse(cached) : null
+  } catch (error) {
+    console.error('Redis get error:', error)
+    return null
   }
-  return null;
 }
 
-async function cacheInRedis(type, query, results) {
-  const cacheKey = `search:${type}:${query}`;
-  await redisClient.set(cacheKey, JSON.stringify(results));
-  await redisClient.expire(cacheKey, 3 * 3600); // 3 hours
-}
-
-const searchProducts = async (query, page = 1, limit = 10) => {
-  const skip = (page - 1) * limit;
-  const cachedResults = await searchInRedis('products', query);
-  if (cachedResults) {
-    return cachedResults;
+async function setCachedResults(type, query, page, limit, results) {
+  const cacheKey = `search:${type}:${query}:${page}:${limit}`
+  try {
+    await redisClient.set(cacheKey, JSON.stringify(results))
+    await redisClient.expire(cacheKey, CACHE_EXPIRE_SECONDS)
+  } catch (error) {
+    console.error('Redis set error:', error)
   }
-
-  const regex = new RegExp(`.*${query}.*`, 'i')
-  const products = await ProductModel.find({
-    $or: [
-      { name: regex },
-      { tags: regex },
-      { brand: regex }
-    ]
-  }).skip(skip).limit(limit)
-
-  await cacheInRedis('products', query, products);
-
-  return products
 }
 
-const searchCategories = async (query, page = 1, limit = 10) => {
+function buildRegex(query) {
+  return new RegExp(query, 'i')
+}
+
+async function searchProducts(query, page = 1, limit = 10) {
   const skip = (page - 1) * limit
-  const cachedResults = await searchInRedis('categories', query);
+  const cached = await getCachedResults('products', query, page, limit)
+  if (cached.products) return cached.products
 
-  if (cachedResults) {
-    return cachedResults;
+  const regex = buildRegex(query)
+  let Allproducts = []
+  try {
+    // Find matching categories and collect their IDs
+    const category = await CategoryModel.find({
+      $or: [
+        { name: regex },
+        { tags: regex },
+        { description: regex }
+      ]
+    }, { _id: 1 }) // Only select _id
+    const category_ids = category.map(cat => cat._id)
+
+    // Find products directly by name, tags, brand, description
+    const products = await ProductModel.find({
+      $or: [
+        { name: regex },
+        { tags: regex },
+        { category_id: category_ids },
+        { brand: regex },
+        { description: regex }
+      ]
+    }).skip(skip).limit(limit)
+    Allproducts.push(...products)
+    await setCachedResults('products', query, page, limit, Allproducts)
+    return Allproducts
+  } catch (error) {
+    console.error('searchProducts error:', error)
+    return []
   }
-
-  const regex = new RegExp(`.*${query}.*`, 'i')
-  const categories = await CategoryModel.find({
-    $or: [
-      { name: regex },
-      { description: regex }
-    ]
-  }).skip(skip).limit(limit)
-  await cacheInRedis('categories', query, categories);
-  return categories
 }
 
-const searchServices = async (query, page = 1, limit = 10) => {
+async function searchCategories(query, page = 1, limit = 10) {
   const skip = (page - 1) * limit
-  const cachedResults = await searchInRedis('services', query);
+  const cached = await getCachedResults('categories', query, page, limit)
+  if (cached) return cached
 
-  if (cachedResults) {
-    return cachedResults;
+  const regex = buildRegex(query)
+  try {
+    const categories = await CategoryModel.find({
+      $or: [
+        { name: regex },
+        { description: regex }
+      ]
+    }).skip(skip).limit(limit)
+    await setCachedResults('categories', query, page, limit, categories)
+    return categories
+  } catch (error) {
+    console.error('searchCategories error:', error)
+    return []
   }
-
-  const regex = new RegExp(`.*${query}.*`, 'i')
-  const services = await ServiceModel.find({
-    $or: [
-      { name: regex },
-      { description: regex }
-    ]
-  }).skip(skip).limit(limit)
-  await cacheInRedis('services', query, services);
-  return services
 }
 
-const searchServiceCategories = async (query, page = 1, limit = 10) => {
+async function searchServices(query, page = 1, limit = 10) {
   const skip = (page - 1) * limit
-  const cachedResults = await searchInRedis('service_categories', query);
-  if (cachedResults) {
-    return cachedResults;
-  }
+  const cached = await getCachedResults('services', query, page, limit)
+  if (cached) return cached
 
-  const regex = new RegExp(`.*${query}.*`, 'i')
-  const categories = await ServiceCategoryModel.find({
-    $or: [
-      { name: regex },
-      { description: regex }
-    ]
-  }).skip(skip).limit(limit)
-  await cacheInRedis('service_categories', query, categories);
-  return categories
+  const regex = buildRegex(query)
+  try {
+    const services = await ServiceModel.find({
+      $or: [
+        { name: regex },
+        { description: regex }
+      ]
+    }).skip(skip).limit(limit)
+    await setCachedResults('services', query, page, limit, services)
+    return services
+  } catch (error) {
+    console.error('searchServices error:', error)
+    return []
+  }
 }
 
-// const searchUsers = async (query, page = 1, limit = 10) => {
-//   const skip = (page - 1) * limit
-//   const cachedResults = await searchInRedis('users', query);
-//   if (cachedResults) {
-//     return cachedResults;
-//   }
-
-//   const regex = new RegExp(`.*${query}.*`, 'i')
-//   const users = await UserModel.find({
-//     $or: [
-//       { name: regex },
-//       { email: regex },
-//       { phone: regex }
-//     ]
-//   }).skip(skip).limit(limit)
-//   await cacheInRedis('users', query, users);
-//   return users
-// }
-
-const searchRequests = async (query, page = 1, limit = 10) => {
+async function searchServiceCategories(query, page = 1, limit = 10) {
   const skip = (page - 1) * limit
-  const regex = new RegExp(`.*${query}.*`, 'i')
-  const repair = await Repair.find({
-    $or: [
-      { name: regex },
-      { email: regex },
-      { phone: regex },
-      { address: regex },
-      { problem_description: regex }
-    ]
-  }).skip(skip).limit(limit)
+  const cached = await getCachedResults('service_categories', query, page, limit)
+  if (cached) return cached
 
-  const order = await Order.find({
-    $or: [
-      { name: regex },
-      { email: regex },
-      { phone: regex },
-      { address: regex },
-      { note: regex }
-    ]
-  }).skip(skip).limit(limit)
+  const regex = buildRegex(query)
+  try {
+    const categories = await ServiceCategoryModel.find({
+      $or: [
+        { name: regex },
+        { description: regex }
+      ]
+    }).skip(skip).limit(limit)
+    await setCachedResults('service_categories', query, page, limit, categories)
+    return categories
+  } catch (error) {
+    console.error('searchServiceCategories error:', error)
+    return []
+  }
+}
 
-  return { repair, order }
+async function searchRequests(query, page = 1, limit = 10) {
+  const skip = (page - 1) * limit
+  const regex = buildRegex(query)
+  try {
+    const repair = await Repair.find({
+      $or: [
+        { name: regex },
+        { email: regex },
+        { phone: regex },
+        { address: regex },
+        { problem_description: regex }
+      ]
+    }).skip(skip).limit(limit)
+
+    const order = await Order.find({
+      $or: [
+        { name: regex },
+        { email: regex },
+        { phone: regex },
+        { address: regex },
+        { note: regex }
+      ]
+    }).skip(skip).limit(limit)
+
+    return { repair, order }
+  } catch (error) {
+    console.error('searchRequests error:', error)
+    return { repair: [], order: [] }
+  }
 }
 
 export const searchService = {

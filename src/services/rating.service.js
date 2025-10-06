@@ -3,33 +3,65 @@ import { StatusCodes } from 'http-status-codes'
 import Rating from '~/models/Rating.model.js'
 
 const createRating = async (reqBody) => {
-  const newRating = new Rating(reqBody)
-  await newRating.save()
-  return newRating
+  try {
+    const newRating = new Rating(reqBody)
+    await newRating.save()
+    return newRating
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
+  }
 }
 
 const getRatingsByProductId = async (id, page = 1, limit = 10) => {
   const skip = (page - 1) * limit
-  const ratings = await Rating.find({ product_id: id })
-    .skip(skip)
-    .limit(limit)
-    .sort({ createdAt: -1 })
-  return ratings
+  try {
+    const [ratings, total] = await Promise.all([
+      Rating.find({ product_id: id })
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 }),
+      Rating.countDocuments({ product_id: id })
+    ])
+    return {
+      ratings,
+      total,
+      page,
+      limit
+    }
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
+  }
 }
 
 const getRatingsByServiceId = async (id, page = 1, limit = 10) => {
   const skip = (page - 1) * limit
-  const ratings = await Rating.find({ service_id: id })
-    .skip(skip)
-    .limit(limit)
-    .sort({ createdAt: -1 })
-  return ratings
+  try {
+    const [ratings, total] = await Promise.all([
+      Rating.find({ service_id: id })
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 }),
+      Rating.countDocuments({ service_id: id })
+    ])
+    return {
+      ratings,
+      total,
+      page,
+      limit
+    }
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
+  }
 }
 
 const deleteRating = async (id) => {
-  const deleted = await Rating.findByIdAndDelete(id)
-  if (!deleted) throw new ApiError(StatusCodes.NOT_FOUND, 'Rating not found')
-  return deleted
+  try {
+    const deleted = await Rating.findByIdAndDelete(id)
+    if (!deleted) throw new ApiError(StatusCodes.NOT_FOUND, 'Rating not found')
+    return deleted
+  } catch (error) {
+    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
+  }
 }
 
 export const ratingService = {
@@ -37,4 +69,4 @@ export const ratingService = {
   getRatingsByProductId,
   getRatingsByServiceId,
   deleteRating
-};
+}

@@ -104,6 +104,46 @@ const searchServices = async (req, res, next) => {
   }
 }
 
+const countViewRedis = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const data = req.body
+    const views = await serviceService.countViewRedis(id, data)
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      views
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const getServiceViews = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const views = await serviceService.getServiceViews(id)
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      views
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const getFeaturedServices = async (req, res, next) => {
+  try {
+    const { limit } = req.query
+    const featured = await serviceService.getFeaturedServices(limit)
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      services: featured
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const serviceController = {
   createService,
   updateService,
@@ -112,5 +152,8 @@ export const serviceController = {
   getServiceById,
   getServiceBySlug,
   deleteService,
-  searchServices
+  searchServices,
+  countViewRedis,
+  getServiceViews,
+  getFeaturedServices
 }

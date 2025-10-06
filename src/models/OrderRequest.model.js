@@ -23,12 +23,14 @@ const orderRequestSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
+    unique: false,
     trim: true,
     maxlength: 100
   },
   email: {
     type: String,
     required: false,
+    unique: false,
     trim: true,
     maxlength: 100
   },

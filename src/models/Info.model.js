@@ -22,6 +22,9 @@ const InfoSchema = new mongoose.Schema({
   x: { type: String, required: false, trim: true, maxLength: 200 },
   terms: { type: String, required: false, trim: true, maxLength: 1000 },           // Điều khoản dịch vụ url
   policy: { type: String, required: false, trim: true, maxLength: 1000 },       // Chính sách bảo mật url  
+  payment: { type: String, required: false, trim: true, maxLength: 1000 },      // Chính sách thanh toán url
+  return: { type: String, required: false, trim: true, maxLength: 1000 },       // Chính sách đổi trả url
+  cookies: { type: String, required: false, trim: true, maxLength: 1000 }      // Chính sách cookies url
 }, schemaOptions);
 
 const InfoModel = mongoose.model('Info', InfoSchema);

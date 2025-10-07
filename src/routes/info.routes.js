@@ -24,7 +24,10 @@ Router.put(
   verifyAdmin,
   uploadFile.fields([
     { name: 'terms', maxCount: 1 },
-    { name: 'policy', maxCount: 1 }
+    { name: 'policy', maxCount: 1 },
+    { name: 'payment', maxCount: 1 },
+    { name: 'return', maxCount: 1 },
+    { name: 'cookies', maxCount: 1 }
   ]),
   infoController.update
 )

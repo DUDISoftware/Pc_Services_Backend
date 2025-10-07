@@ -5,7 +5,7 @@ import sendMail from '~/utils/sendMail'
 
 const extractFiles = (filesObject) => {
   const collected = [];
-  ['terms', 'policy'].forEach((key) => {
+  ['terms', 'policy', 'payment', 'return', 'cookies'].forEach((key) => {
     if (filesObject?.[key]?.[0]) {
       collected.push({
         url: filesObject[key][0].path,
@@ -21,7 +21,10 @@ const create = async (reqBody, filesObject) => {
     const info = new InfoModel({
       ...reqBody,
       terms: filesObject?.terms?.[0]?.path || '',
-      policy: filesObject?.policy?.[0]?.path || ''
+      policy: filesObject?.policy?.[0]?.path || '',
+      payment: filesObject?.payment?.[0]?.path || '',
+      return: filesObject?.return?.[0]?.path || '',
+      cookies: filesObject?.cookies?.[0]?.path || ''
     })
     await info.save()
     return info
@@ -54,6 +57,15 @@ const update = async (reqBody, filesObject) => {
     }
     if (filesObject?.policy?.[0]?.path) {
       updateData.policy = filesObject.policy[0].path
+    }
+    if (filesObject?.payment?.[0]?.path) {
+      updateData.payment = filesObject.payment[0].path
+    }
+    if (filesObject?.return?.[0]?.path) {
+      updateData.return = filesObject.return[0].path
+    }
+    if (filesObject?.cookies?.[0]?.path) {
+      updateData.cookies = filesObject.cookies[0].path
     }
 
     let info = await InfoModel.findOneAndUpdate({}, updateData, { new: true })

@@ -5,10 +5,10 @@ import { redisClient } from '~/config/redis.js'
 
 const createService = async (reqBody) => {
   try {
-    const { category, ...rest } = reqBody
+    const { category_id, ...rest } = reqBody
     const service = new ServiceModel({
       ...rest,
-      category_id: category
+      category_id: category_id || null,
     })
     await service.save()
     return service.populate('category_id', 'name')

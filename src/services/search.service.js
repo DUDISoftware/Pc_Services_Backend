@@ -37,7 +37,11 @@ function buildRegex(query) {
 async function searchProducts(query, page = 1, limit = 10) {
   const skip = (page - 1) * limit
   const cached = await getCachedResults('products', query, page, limit)
-  if (cached.products) return cached.products
+  if (cached) {
+    if (cached.products) {
+      return cached.products
+    }
+  }
 
   const regex = buildRegex(query)
   let Allproducts = []

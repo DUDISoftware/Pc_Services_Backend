@@ -93,6 +93,7 @@ const verifyEmail = async (email, otp) => {
 export const userService = {
   login,
   register,
+  sendEmail,
   sendOTP,
   verifyEmail,
   getProfile,

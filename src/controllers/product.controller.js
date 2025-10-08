@@ -63,6 +63,21 @@ const updateQuantity = async (req, res, next) => {
   }
 }
 
+const updateStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const { status } = req.body
+    const updatedProduct = await productService.updateStatus(id, status)
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'Cập nhật trạng thái product thành công',
+      product: updatedProduct
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 const getFeaturedProducts = async (req, res, next) => {
   try {
     const { limit = 8 } = req.query
@@ -174,6 +189,7 @@ export const productController = {
   createProduct,
   updateProduct,
   updateQuantity,
+  updateStatus,
   deleteProduct,
   getAllProducts,
   getProductById,

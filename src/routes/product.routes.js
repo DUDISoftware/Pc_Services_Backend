@@ -40,6 +40,14 @@ Router.patch(
   productController.updateQuantity
 )
 
+Router.patch(
+  '/:id/status',
+  verifyToken,
+  verifyAdmin,
+  productValidation.updateStatus,
+  productController.updateStatus
+)
+
 // GET APIs
 Router.get('/', productController.getAllProducts) // ?page=1&limit=10
 Router.get('/featured', productController.getFeaturedProducts)

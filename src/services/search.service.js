@@ -106,7 +106,8 @@ async function searchServices(query, page = 1, limit = 10) {
     const services = await ServiceModel.find({
       $or: [
         { name: regex },
-        { description: regex }
+        { description: regex },
+        { slug: regex }
       ]
     }).skip(skip).limit(limit)
     await setCachedResults('services', query, page, limit, services)

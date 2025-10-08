@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes'
 import { serviceService } from '~/services/customerService.service'
-import { searchServices as searchService } from '~/services/search.service.js'
+import { searchService } from '~/services/search.service.js'
 
 const createService = async (req, res, next) => {
   try {
@@ -94,7 +94,7 @@ const searchServices = async (req, res, next) => {
       })
     }
 
-    const results = await searchService(query, page, limit)
+    const results = await searchService.searchServices(query, page, limit)
     res.status(StatusCodes.OK).json({
       status: 'success',
       results

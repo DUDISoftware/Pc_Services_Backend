@@ -93,6 +93,23 @@ const updateQuantity = async (req, res, next) => {
   }
 }
 
+const updateStatus = async (req, res, next) => {
+  const updateStatusRule = Joi.object({
+    status: Joi.string().valid('available', 'out_of_stock', 'hidden').required()
+  })
+  try {
+    const data = req?.body ? req.body : {}
+    const params = req?.params ? req.params : {}
+    const validatedParams = await idValidationRule.validateAsync(params, { abortEarly: false })
+    const validatedData = await updateStatusRule.validateAsync(data, { abortEarly: false })
+    req.body = validatedData
+    req.params = validatedParams
+    next()
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))
+  }
+}
+
 const deleteProduct = async (req, res, next) => {
   try {
     const params = req?.params ? req.params : {}
@@ -142,6 +159,7 @@ const getProductBySlug = async (req, res, next) => {
 export const productValidation = {
   createProduct,
   updateProduct,
+  updateStatus,
   updateQuantity,
   deleteProduct,
   getProductBySlug,

@@ -37,6 +37,16 @@ const updateQuantity = async (id, quantity) => {
   return updated
 }
 
+const updateStatus = async (id, status) => {
+  const updated = await ProductModel.findByIdAndUpdate(
+    id,
+    { status },
+    { new: true }
+  )
+  if (!updated) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
+  return updated
+}
+
 const deleteProduct = async (id) => {
   const result = await ProductModel.findByIdAndDelete(id)
   if (!result) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
@@ -149,6 +159,7 @@ export const productService = {
   createProduct,
   updateProduct,
   updateQuantity,
+  updateStatus,
   deleteProduct,
   getAllProducts,
   getProductById,

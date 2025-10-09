@@ -12,7 +12,9 @@ const schemaOptions = {
 const orderRequestSchema = new mongoose.Schema({
   items: [{
     product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'products', required: true },
-    quantity: { type: Number, required: true, min: 1 }
+    name: { type: String, required: true, trim: true, maxlength: 200 },
+    quantity: { type: Number, required: true, min: 1 },
+    price: { type: Number, required: true, min: 0 }
   }],
   name: {
     type: String,

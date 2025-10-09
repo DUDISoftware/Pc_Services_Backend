@@ -56,6 +56,8 @@ Router.get('/slug/:slug', productValidation.getProductBySlug, productController.
 Router.get('/category/:categoryId', productValidation.getProductsByCategory, productController.getProductsByCategory)
 Router.get('/:id', productValidation.getProductById, productController.getProductById)
 Router.get('/:id/related', productValidation.getProductById, productController.getRelatedProducts)
+Router.get('/:id/quantity', productValidation.getQuantity, productController.getQuantity)
+
 
 // Redis Views
 Router.get('/:id/views', productValidation.getProductById, productController.getProductViews)

@@ -33,6 +33,16 @@ const getRelatedProducts = async (req, res, next) => {
   }
 }
 
+const getQuantity = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const quantity = await productService.getQuantity(id)
+    res.status(StatusCodes.OK).json({ status: 'success', quantity: quantity })
+  } catch (error) {
+    next(error)
+  }
+}
+
 const updateProduct = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -197,6 +207,7 @@ export const productController = {
   getProductBySlug,
   getFeaturedProducts,
   getRelatedProducts,
+  getQuantity,
   searchProducts,
   getProductViews,
   countViewRedis

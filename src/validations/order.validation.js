@@ -10,7 +10,10 @@ const idValidationRule = Joi.object({
 
 const productValidationRule = Joi.object({
   product_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
-  quantity: Joi.number().min(1).required()
+  quantity: Joi.number().min(1).required(),
+  name: Joi.string().max(200).trim().required(),
+  price: Joi.number().min(0).required(),
+  image: Joi.string().max(500).trim().optional().allow(''),
 })
 
 const statusValidationRule = Joi.object({

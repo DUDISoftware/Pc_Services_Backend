@@ -4,7 +4,7 @@ import { searchService } from '~/services/search.service.js'
 
 const createService = async (req, res, next) => {
   try {
-    const service = await serviceService.createService(req.body)
+    const service = await serviceService.createService(req.body, req.files)
     res.status(StatusCodes.CREATED).json({
       status: 'success',
       message: 'Tạo dịch vụ thành công',
@@ -18,7 +18,7 @@ const createService = async (req, res, next) => {
 const updateService = async (req, res, next) => {
   try {
     const { id } = req.params
-    const updated = await serviceService.updateService(id, req.body)
+    const updated = await serviceService.updateService(id, req.body, req.files)
     res.status(StatusCodes.OK).json({
       status: 'success',
       message: 'Cập nhật dịch vụ thành công',

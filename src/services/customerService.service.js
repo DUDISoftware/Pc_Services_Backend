@@ -3,12 +3,17 @@ import { StatusCodes } from 'http-status-codes'
 import ServiceModel from '~/models/Service.model.js'
 import { redisClient } from '~/config/redis.js'
 
-const createService = async (reqBody) => {
+const createService = async (reqBody, files) => {
   try {
     const { category_id, ...rest } = reqBody
+    const images = files?.map(file => ({
+      url: file.path,
+      public_id: file.filename
+    })) || []
     const service = new ServiceModel({
       ...rest,
       category_id: category_id || null,
+      images
     })
     await service.save()
     return service.populate('category_id', 'name')
@@ -17,13 +22,14 @@ const createService = async (reqBody) => {
   }
 }
 
-const updateService = async (id, reqBody) => {
+const updateService = async (id, reqBody, files) => {
   try {
-    const { category_id, ...rest } = reqBody
-    const updateData = {
-      ...rest,
-      ...(category_id && { category_id }),
-      updated_at: Date.now()
+    const updateData = { ...reqBody, updatedAt: Date.now() }
+    if (files?.length) {
+      updateData.images = files.map(file => ({
+        url: file.path,
+        public_id: file.filename
+      }))
     }
     const service = await ServiceModel.findByIdAndUpdate(id, updateData, {
       new: true
@@ -97,7 +103,7 @@ const getFeaturedServices = async (limit = 4) => {
     do {
       const reply = await redisClient.scan(cursor, {
         MATCH: 'service:*:views',
-        COUNT: 100
+        COUNT: 10
       })
       cursor = reply.cursor
       keys = keys.concat(reply.keys)

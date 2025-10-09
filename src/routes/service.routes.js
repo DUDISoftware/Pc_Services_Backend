@@ -1,5 +1,6 @@
 import express from 'express'
 import { verifyToken, verifyAdmin } from '~/middlewares/auth.middleware.js'
+import { uploadImage } from '~/middlewares/upload.middleware.js'
 import { serviceController } from '~/controllers/service.controller'
 import { serviceValidation } from '~/validations/service.validation.js'
 
@@ -14,8 +15,8 @@ Router.get('/:id', serviceController.getServiceById)
 Router.get('/:id/views', serviceController.getServiceViews)
 
 // Admin routes (token required)
-Router.post('/', verifyToken, verifyAdmin, serviceValidation.createService, serviceController.createService)
-Router.put('/:id', verifyToken, serviceValidation.updateService, serviceController.updateService)
+Router.post('/', verifyToken, verifyAdmin, uploadImage.array('images'), serviceValidation.createService, serviceController.createService)
+Router.put('/:id', verifyToken, uploadImage.array('images'), serviceValidation.updateService, serviceController.updateService)
 Router.patch('/:id/hide', verifyToken, serviceController.hideService)
 Router.delete('/:id', verifyToken, serviceController.deleteService)
 Router.post('/:id/views', serviceController.countViewRedis)

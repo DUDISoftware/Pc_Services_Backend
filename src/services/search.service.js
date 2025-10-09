@@ -34,7 +34,7 @@ function buildRegex(query) {
   return new RegExp(query, 'i')
 }
 
-async function searchProducts(query, page = 1, limit = 10) {
+async function searchProducts(query, page = 1, limit = 10, filter = {}) {
   const skip = (page - 1) * limit
   const cached = await getCachedResults('products', query, page, limit)
   if (cached) {
@@ -52,7 +52,8 @@ async function searchProducts(query, page = 1, limit = 10) {
         { name: regex },
         { tags: regex },
         { description: regex }
-      ]
+      ],
+      ...filter
     }, { _id: 1 }) // Only select _id
     const category_ids = category.map(cat => cat._id)
 
@@ -64,7 +65,8 @@ async function searchProducts(query, page = 1, limit = 10) {
         { category_id: category_ids },
         { brand: regex },
         { description: regex }
-      ]
+      ],
+      ...filter
     }).skip(skip).limit(limit)
     Allproducts.push(...products)
     await setCachedResults('products', query, page, limit, Allproducts)
@@ -75,7 +77,7 @@ async function searchProducts(query, page = 1, limit = 10) {
   }
 }
 
-async function searchCategories(query, page = 1, limit = 10) {
+async function searchCategories(query, page = 1, limit = 10, filter = {}) {
   const skip = (page - 1) * limit
   const cached = await getCachedResults('categories', query, page, limit)
   if (cached) return cached
@@ -86,7 +88,8 @@ async function searchCategories(query, page = 1, limit = 10) {
       $or: [
         { name: regex },
         { description: regex }
-      ]
+      ],
+      ...filter
     }).skip(skip).limit(limit)
     await setCachedResults('categories', query, page, limit, categories)
     return categories
@@ -96,7 +99,7 @@ async function searchCategories(query, page = 1, limit = 10) {
   }
 }
 
-async function searchServices(query, page = 1, limit = 10) {
+async function searchServices(query, page = 1, limit = 10, filter = {}) {
   const skip = (page - 1) * limit
   const cached = await getCachedResults('services', query, page, limit)
   if (cached) return cached
@@ -108,7 +111,8 @@ async function searchServices(query, page = 1, limit = 10) {
         { name: regex },
         { description: regex },
         { slug: regex }
-      ]
+      ],
+      ...filter
     }).skip(skip).limit(limit)
     await setCachedResults('services', query, page, limit, services)
     return services
@@ -118,7 +122,7 @@ async function searchServices(query, page = 1, limit = 10) {
   }
 }
 
-async function searchServiceCategories(query, page = 1, limit = 10) {
+async function searchServiceCategories(query, page = 1, limit = 10, filter = {}) {
   const skip = (page - 1) * limit
   const cached = await getCachedResults('service_categories', query, page, limit)
   if (cached) return cached
@@ -129,7 +133,8 @@ async function searchServiceCategories(query, page = 1, limit = 10) {
       $or: [
         { name: regex },
         { description: regex }
-      ]
+      ],
+      ...filter
     }).skip(skip).limit(limit)
     await setCachedResults('service_categories', query, page, limit, categories)
     return categories
@@ -139,7 +144,7 @@ async function searchServiceCategories(query, page = 1, limit = 10) {
   }
 }
 
-async function searchRequests(query, page = 1, limit = 10) {
+async function searchRequests(query, page = 1, limit = 10, filter = {}) {
   const skip = (page - 1) * limit
   const regex = buildRegex(query)
   try {
@@ -150,7 +155,8 @@ async function searchRequests(query, page = 1, limit = 10) {
         { phone: regex },
         { address: regex },
         { problem_description: regex }
-      ]
+      ],
+      ...filter
     }).skip(skip).limit(limit)
 
     const order = await Order.find({
@@ -160,7 +166,8 @@ async function searchRequests(query, page = 1, limit = 10) {
         { phone: regex },
         { address: regex },
         { note: regex }
-      ]
+      ],
+      ...filter
     }).skip(skip).limit(limit)
 
     return { repair, order }

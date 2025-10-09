@@ -2,6 +2,7 @@ import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
 import ServiceModel from '~/models/Service.model.js'
 import { redisClient } from '~/config/redis.js'
+import ExcelJS from 'exceljs'
 
 const createService = async (reqBody) => {
   try {
@@ -140,6 +141,60 @@ const countViewRedis = async (id) => {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }
 }
+// excel
+
+const exportServicesToExcel = async () => {
+  const customersService = await ServiceModel.find()
+  .populate('category_id', 'name slug') 
+  .sort({ createdAt: -1 });
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('customersService');
+
+  worksheet.columns = [
+    { header: 'Tên dịch vụ', key: 'name', width: 30 },
+    { header: 'Mô tả', key: 'description', width: 40 },
+    { header: 'Giá', key: 'price', width: 15 },
+    { header: 'Danh mục', key: 'category', width: 25 },
+    { header: 'Trạng thái', key: 'status', width: 15 },
+
+  ];
+  worksheet.getRow(1).eachCell((cell) => {
+    cell.font = { bold: true, size: 12 }; 
+    cell.alignment = { horizontal: 'center', vertical: 'middle' }; 
+    cell.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFDCE6F1' } 
+  };
+  cell.border = {                 
+    top: { style: 'thin' },
+    left: { style: 'thin' },
+    bottom: { style: 'thin' },
+    right: { style: 'thin' },
+  };
+});
+
+  const statusMap = {
+    active: 'Đã mở',
+    inactive: 'Chưa mở',
+    hidden: 'Đã ẩn',
+  };
+
+  customersService.forEach((customersService) => {
+  const statusText = statusMap[customersService.status] || 'Không xác định';
+
+    worksheet.addRow({
+      name: customersService.name,
+      description: customersService.description,
+      price: customersService.price,
+      category: customersService.category_id?.name || '',
+      status: statusText,
+    });
+  });
+  const buffer = await workbook.xlsx.writeBuffer();
+  return buffer;
+};
 
 export const serviceService = {
   createService,
@@ -151,5 +206,6 @@ export const serviceService = {
   deleteService,
   getFeaturedServices,
   getServiceViews,
-  countViewRedis
+  countViewRedis,
+  exportServicesToExcel
 }

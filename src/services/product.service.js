@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes'
 import ProductModel from '~/models/Product.model'
 import { deleteImage } from '~/utils/cloudinary.js'
 import { redisClient } from '~/config/redis.js'
+import ExcelJS from 'exceljs'
 
 const createProduct = async (reqBody, files) => {
   const images = files?.map(file => ({
@@ -19,7 +20,7 @@ const updateProduct = async (id, reqBody, files) => {
   if (files?.length) {
     updateData.images = files.map(file => ({
       url: file.path,
-      public_id: file.filename
+      public_id: file.filename  
     }))
   }
   const updated = await ProductModel.findByIdAndUpdate(id, updateData, { new: true })
@@ -145,6 +146,61 @@ const countViewRedis = async (id) => {
   return views
 }
 
+//excel
+const exportProductsToExcel = async () => {
+  const products = await ProductModel.find()
+    .populate('category_id', 'name slug')
+    .sort({ createdAt: -1 });
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Products');
+
+  worksheet.columns = [
+    { header: 'Tên sản phẩm', key: 'name', width: 30 },
+    { header: 'Giá', key: 'price', width: 15 },
+    { header: 'Danh mục', key: 'brand', width: 15},
+    { header: 'Số lượng', key: 'quantity', width: 15 },
+    { header: 'Mô tả', key: 'description', width: 40 },
+    { header: 'Trạng thái', key: 'statuss', width: 15 },
+  ];
+    worksheet.getRow(1).eachCell((cell) => {
+  cell.font = { bold: true, size: 12 }; 
+  cell.alignment = { horizontal: 'center', vertical: 'middle' }; 
+  cell.fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFDCE6F1' } 
+  };
+  cell.border = {                 
+    top: { style: 'thin' },
+    left: { style: 'thin' },
+    bottom: { style: 'thin' },
+    right: { style: 'thin' },
+  };
+});
+
+  const statusMap = {
+    available: 'Có sẵn',
+    out_of_stock: 'Hết hàng',
+    hidden: 'Đã ẩn',
+  };
+
+  products.forEach((product) => {
+    const statusText = statusMap[product.status] || 'Không xác định';
+
+    worksheet.addRow({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      brand: product.brand,
+      quantity: product.quantity,
+      statuss: statusText,
+    });
+  });
+  const buffer = await workbook.xlsx.writeBuffer();
+  return buffer;
+};
+
 export const productService = {
   createProduct,
   updateProduct,
@@ -157,5 +213,6 @@ export const productService = {
   getRelatedProducts,
   getProductBySlug,
   getProductViews,
-  countViewRedis
+  countViewRedis,
+  exportProductsToExcel
 }

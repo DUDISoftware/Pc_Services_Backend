@@ -40,6 +40,14 @@ Router.patch(
   productController.updateQuantity
 )
 
+Router.patch(
+  '/:id/status',
+  verifyToken,
+  verifyAdmin,
+  productValidation.updateStatus,
+  productController.updateStatus
+)
+
 // GET APIs
 Router.get('/', productController.getAllProducts) // ?page=1&limit=10
 Router.get('/featured', productController.getFeaturedProducts)
@@ -48,6 +56,8 @@ Router.get('/slug/:slug', productValidation.getProductBySlug, productController.
 Router.get('/category/:categoryId', productValidation.getProductsByCategory, productController.getProductsByCategory)
 Router.get('/:id', productValidation.getProductById, productController.getProductById)
 Router.get('/:id/related', productValidation.getProductById, productController.getRelatedProducts)
+Router.get('/:id/quantity', productValidation.getQuantity, productController.getQuantity)
+
 
 // Redis Views
 Router.get('/:id/views', productValidation.getProductById, productController.getProductViews)

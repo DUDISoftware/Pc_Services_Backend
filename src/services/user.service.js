@@ -40,8 +40,8 @@ const getProfile = async (userId) => {
   return user
 }
 
-const getAllUsers = async () => {
-  return await UserModel.find().select('-password')
+const getAllUsers = async (filter = {}) => {
+  return await UserModel.find(filter).select('-password')
 }
 
 const updateUser = async (userId, reqBody) => {
@@ -93,6 +93,7 @@ const verifyEmail = async (email, otp) => {
 export const userService = {
   login,
   register,
+  sendEmail,
   sendOTP,
   verifyEmail,
   getProfile,

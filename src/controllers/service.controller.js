@@ -1,10 +1,10 @@
 import { StatusCodes } from 'http-status-codes'
 import { serviceService } from '~/services/customerService.service'
-import { searchServices as searchService } from '~/services/search.service.js'
+import { searchService } from '~/services/search.service.js'
 
 const createService = async (req, res, next) => {
   try {
-    const service = await serviceService.createService(req.body)
+    const service = await serviceService.createService(req.body, req.files)
     res.status(StatusCodes.CREATED).json({
       status: 'success',
       message: 'Tạo dịch vụ thành công',
@@ -18,7 +18,7 @@ const createService = async (req, res, next) => {
 const updateService = async (req, res, next) => {
   try {
     const { id } = req.params
-    const updated = await serviceService.updateService(id, req.body)
+    const updated = await serviceService.updateService(id, req.body, req.files)
     res.status(StatusCodes.OK).json({
       status: 'success',
       message: 'Cập nhật dịch vụ thành công',
@@ -94,7 +94,7 @@ const searchServices = async (req, res, next) => {
       })
     }
 
-    const results = await searchService(query, page, limit)
+    const results = await searchService.searchServices(query, page, limit)
     res.status(StatusCodes.OK).json({
       status: 'success',
       results

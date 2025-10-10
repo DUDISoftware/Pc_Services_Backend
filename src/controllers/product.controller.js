@@ -33,6 +33,16 @@ const getRelatedProducts = async (req, res, next) => {
   }
 }
 
+const getQuantity = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const quantity = await productService.getQuantity(id)
+    res.status(StatusCodes.OK).json({ status: 'success', quantity: quantity })
+  } catch (error) {
+    next(error)
+  }
+}
+
 const updateProduct = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -56,6 +66,21 @@ const updateQuantity = async (req, res, next) => {
     res.status(StatusCodes.OK).json({
       status: 'success',
       message: 'Cập nhật số lượng product thành công',
+      product: updatedProduct
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const updateStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const { status } = req.body
+    const updatedProduct = await productService.updateStatus(id, status)
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'Cập nhật trạng thái product thành công',
       product: updatedProduct
     })
   } catch (error) {
@@ -174,6 +199,7 @@ export const productController = {
   createProduct,
   updateProduct,
   updateQuantity,
+  updateStatus,
   deleteProduct,
   getAllProducts,
   getProductById,
@@ -181,6 +207,7 @@ export const productController = {
   getProductBySlug,
   getFeaturedProducts,
   getRelatedProducts,
+  getQuantity,
   searchProducts,
   getProductViews,
   countViewRedis

@@ -15,8 +15,8 @@ const updateCategory = async (id, reqBody) => {
   return updated
 }
 
-const getAllCategories = async () => {
-  return ServiceCategoryModel.find().sort({ createdAt: -1 })
+const getAllCategories = async (filter = {}) => {
+  return ServiceCategoryModel.find(filter).sort({ createdAt: -1 })
 }
 
 const getCategoryById = async (id) => {

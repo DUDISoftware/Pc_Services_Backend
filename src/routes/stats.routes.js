@@ -6,9 +6,10 @@ import { statsValidation } from '~/validations/stats.validation.js'
 const Router = express.Router()
 
 // Validation first, then authentication, then controller
-Router.get('/', verifyToken, verifyAdmin, statsController.getAll)
-Router.get('/:date', verifyToken, verifyAdmin, statsController.getStats)
-Router.get('/month/:month/:year', statsValidation.getMonth, verifyToken, verifyAdmin, statsController.getByMonth)
+Router.get('/', verifyToken, verifyAdmin, statsController.getAllStats)
+Router.get('/current', statsController.getCurrentStats)
+Router.get('/:date', verifyToken, verifyAdmin, statsController.getStatsByDate)
+Router.get('/month/:month/:year', statsValidation.getMonth, statsController.getStatsByMonth)
 
 Router.post('/', verifyToken, verifyAdmin, statsController.createStats)
 Router.put('/', statsValidation.updateStats, verifyToken, verifyAdmin, statsController.updateStats)

@@ -60,8 +60,8 @@ const serviceSchema = new mongoose.Schema(
       enum: ['active', 'inactive', 'hidden'],
       default: 'active',
     },
-    image: {
-      type: [String],
+    images: {
+      type: [Object],
       required: false,
       default: []
     },

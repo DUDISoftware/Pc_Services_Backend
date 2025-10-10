@@ -7,6 +7,8 @@ import { env } from '~/config/environment.js'
 import { APIs } from '~/routes/index.js'
 import { errorHandler } from '~/middlewares/error.middleware.js'
 import bodyParser from 'body-parser'
+import { startDailyStatsCron } from './cron/updateStats.cron.js';
+
 const APP_HOST = env.APP_HOST || 'localhost'
 const APP_PORT = env.APP_PORT || 5000
 
@@ -31,6 +33,7 @@ app.use(cors({
   console.log('Connecting to database...')
   await CONNECT_DB()
   console.log('Database connected successfully')
+  startDailyStatsCron();
   console.log('Connecting to Redis')
   await CONNECT_REDIS()
   console.log('Redis connected')

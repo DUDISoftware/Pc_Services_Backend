@@ -45,8 +45,8 @@ const hideRequest = async (req, res, next) => {
 
 const getAllRequests = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10 } = req.query
-    const requests = await repairService.getAllRequests(Number(page), Number(limit))
+    const { page = 1, limit = 10, filter = {} } = req.query
+    const requests = await repairService.getAllRequests(Number(page), Number(limit), filter)
     res.status(StatusCodes.OK).json({
       status: 'success',
       requests

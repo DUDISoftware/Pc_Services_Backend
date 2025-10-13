@@ -8,6 +8,7 @@ const Router = express.Router()
 
 // Public routes (no token required)
 Router.get('/', serviceController.getAllServices)
+Router.get('/export', serviceController.exportServicesToExcel)
 Router.get('/search', serviceController.searchServices)
 Router.get('/featured', serviceController.getFeaturedServices)
 Router.get('/slug/:slug', serviceValidation.getServiceBySlug, serviceController.getServiceBySlug)

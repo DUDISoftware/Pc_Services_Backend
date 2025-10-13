@@ -50,6 +50,7 @@ Router.patch(
 
 // GET APIs
 Router.get('/', productController.getAllProducts) // ?page=1&limit=10
+Router.get('/export', productController.exportProductsToExcel)
 Router.get('/featured', productController.getFeaturedProducts)
 Router.get('/search', productController.searchProducts) // ?query=abc&page=1&limit=10
 Router.get('/slug/:slug', productValidation.getProductBySlug, productController.getProductBySlug)

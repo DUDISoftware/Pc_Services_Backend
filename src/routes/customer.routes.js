@@ -1,3 +1,4 @@
+
 import express from 'express'
 import { customerController } from '~/controllers/customer.controller.js'
 import { verifyToken, verifyAdmin } from '~/middlewares/auth.middleware.js'
@@ -11,3 +12,4 @@ Router.put('/:id', verifyToken, customerController.updateCustomer)
 Router.delete('/:id', verifyToken, customerController.deleteCustomer)
 
 export const customerRoute = Router
+

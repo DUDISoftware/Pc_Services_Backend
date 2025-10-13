@@ -228,6 +228,28 @@ const deleteProduct = async (req, res, next) => {
   }
 }
 
+// excel
+const exportProductsToExcel = async (req, res, next) => {
+  try {
+      const buffer = await productService.exportProductsToExcel();
+
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      );
+      res.setHeader(
+        'Content-Disposition',
+        'attachment; filename=products.xlsx'
+      );
+
+      res.send(buffer);
+    } catch (error) {
+      console.error('❌ Lỗi exportProductsToExcel:', error);
+      next(error);
+    }
+};
+
+
 export const productController = {
   createProduct,
   updateProduct,
@@ -243,5 +265,6 @@ export const productController = {
   getQuantity,
   searchProducts,
   getProductViews,
-  countViewRedis
+  countViewRedis,
+  exportProductsToExcel,
 }

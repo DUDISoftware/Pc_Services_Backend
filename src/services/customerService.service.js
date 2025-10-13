@@ -56,6 +56,7 @@ const hideService = async (id) => {
 const getAllServices = async (filter = {}) => {
   try {
     return await ServiceModel.find(filter)
+      .select('-__v') // add all fields except __v
       .populate('category_id', 'name description status')
       .sort({ created_at: -1 })
   } catch (error) {
@@ -65,7 +66,8 @@ const getAllServices = async (filter = {}) => {
 
 const getServiceById = async (id) => {
   try {
-    const service = await ServiceModel.findById(id)
+    const service = await ServiceModel.findById(id.toString())
+      .select('-__v') // add all fields except __v
       .populate('category_id', 'name description status')
     if (!service) throw new ApiError(StatusCodes.NOT_FOUND, 'Service not found')
     return service
@@ -77,6 +79,7 @@ const getServiceById = async (id) => {
 const getServiceBySlug = async (slug) => {
   try {
     const service = await ServiceModel.findOne({ slug })
+      .select('-__v') // add all fields except __v
       .populate('category_id', 'name description status')
     if (!service) throw new ApiError(StatusCodes.NOT_FOUND, 'Service not found')
     return service

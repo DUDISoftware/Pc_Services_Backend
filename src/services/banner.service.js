@@ -17,9 +17,10 @@ const getSizeByLayout = (layout, position) => {
   }
 }
 
-const getAllBanners = async () => {
+const getAllBanners = async (limit = 10, page = 1) => {
   try {
-    return await BannerModel.find().sort({ createdAt: -1 }).lean()
+    const skip = (page - 1) * limit
+    return await BannerModel.find().sort({ updatedAt: -1 }).skip(skip).limit(limit).lean()
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }

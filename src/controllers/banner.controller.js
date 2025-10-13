@@ -2,7 +2,8 @@ import { StatusCodes } from 'http-status-codes'
 import { bannerService } from '~/services/banner.service.js'
 const getAllBanners = async (req, res, next) => {
   try {
-    const banners = await bannerService.getAllBanners()
+    const { limit, page } = req.query
+    const banners = await bannerService.getAllBanners(limit, page)
     res.status(StatusCodes.OK).json({
       status: 'success',
       banners

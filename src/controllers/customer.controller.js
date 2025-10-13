@@ -16,16 +16,18 @@ const createCustomer = async (req, res, next) => {
 
 const getAllCustomers = async (req, res, next) => {
   try {
-    let { page = 1, limit = 10, filter = {}, field = '' } = req.query
+    let { page = 1, limit = 10, filter = '{}', fields = '' } = req.query
     page = parseInt(page)
     limit = parseInt(limit)
     filter = typeof filter === 'string' ? JSON.parse(filter) : filter
-    field = typeof field === 'string' ? field.split(',').join(' ') : field
-    const data = await customerService.getAllCustomers(page, limit, filter, field)
+    fields = typeof fields === 'string' ? fields.split(',').join(' ') : fields
+    const data = await customerService.getAllCustomers(page, limit, filter, fields)
     res.status(StatusCodes.OK).json({
       status: 'success',
       message: 'Lấy danh sách khách hàng thành công',
-      data
+      data,
+      fields,
+      filter
     })
   } catch (error) {
     next(error)
@@ -35,16 +37,20 @@ const getAllCustomers = async (req, res, next) => {
 const getCustomerById = async (req, res, next) => {
   try {
     const { id } = req.params
-    const customer = await customerService.getCustomerById(id)
+    let { fields = '' } = req.query
+    fields = typeof fields === 'string' ? fields.split(',').join(' ') : fields
+    const customer = await customerService.getCustomerById(id, fields)
     res.status(StatusCodes.OK).json({
       status: 'success',
       message: 'Lấy thông tin khách hàng thành công',
-      customer
+      customer,
+      fields
     })
   } catch (error) {
     next(error)
   }
 }
+
 const updateCustomer = async (req, res, next) => {
   try {
     const { id } = req.params

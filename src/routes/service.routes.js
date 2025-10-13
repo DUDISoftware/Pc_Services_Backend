@@ -11,7 +11,7 @@ Router.get('/', serviceController.getAllServices)
 Router.get('/search', serviceController.searchServices)
 Router.get('/featured', serviceController.getFeaturedServices)
 Router.get('/slug/:slug', serviceValidation.getServiceBySlug, serviceController.getServiceBySlug)
-Router.get('/:id', serviceController.getServiceById)
+Router.get('/:id', serviceValidation.getServiceById, serviceController.getServiceById)
 Router.get('/:id/views', serviceController.getServiceViews)
 
 // Admin routes (token required)

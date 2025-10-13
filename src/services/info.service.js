@@ -39,7 +39,18 @@ const get = async () => {
     if (!info) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Info not found')
     }
-    return info
+    // Add fields for all get methods
+    return {
+      _id: info._id,
+      terms: info.terms,
+      policy: info.policy,
+      payment: info.payment,
+      return: info.return,
+      cookies: info.cookies,
+      createdAt: info.createdAt,
+      updatedAt: info.updatedAt,
+      ...info.toObject()
+    }
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }
@@ -72,7 +83,18 @@ const update = async (reqBody, filesObject) => {
     if (!info) {
       info = await create(reqBody, filesObject)
     }
-    return info
+    // Add fields for all get methods
+    return {
+      _id: info._id,
+      terms: info.terms,
+      policy: info.policy,
+      payment: info.payment,
+      return: info.return,
+      cookies: info.cookies,
+      createdAt: info.createdAt,
+      updatedAt: info.updatedAt,
+      ...info.toObject()
+    }
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }

@@ -58,22 +58,24 @@ const hideRequest = async (id) => {
   }
 }
 
-const getAllRequests = async (page = 1, limit = 10, filter={}) => {
+// Added .select() to specify fields for all get methods
+const getAllRequests = async (page = 1, limit = 10, filter = {}, fields = '') => {
   try {
     const skip = (page - 1) * limit
     return await Repair.find(filter)
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
+      .select(fields)
       .populate('service_id', 'name price')
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }
 }
 
-const getRequestById = async (id) => {
+const getRequestById = async (id, fields = '') => {
   try {
-    return await Repair.findById(id)
+    return await Repair.findById(id).select(fields)
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }

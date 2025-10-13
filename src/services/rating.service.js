@@ -12,11 +12,13 @@ const createRating = async (reqBody) => {
   }
 }
 
-const getRatingsByProductId = async (id, page = 1, limit = 10, filter = {}) => {
+// Add 'fields' parameter to getRatingsByProductId
+const getRatingsByProductId = async (id, page = 1, limit = 10, filter = {}, fields = null) => {
   const skip = (page - 1) * limit
   try {
     const [ratings, total] = await Promise.all([
       Rating.find({ product_id: id, ...filter })
+        .select(fields)
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 }),
@@ -33,11 +35,13 @@ const getRatingsByProductId = async (id, page = 1, limit = 10, filter = {}) => {
   }
 }
 
-const getRatingsByServiceId = async (id, page = 1, limit = 10, filter = {}) => {
+// Add 'fields' parameter to getRatingsByServiceId
+const getRatingsByServiceId = async (id, page = 1, limit = 10, filter = {}, fields = null) => {
   const skip = (page - 1) * limit
   try {
     const [ratings, total] = await Promise.all([
       Rating.find({ service_id: id, ...filter })
+        .select(fields)
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 }),

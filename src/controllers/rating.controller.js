@@ -10,20 +10,28 @@ const createRating = async (req, res, next) => {
   }
 }
 
+// GET ratings by product with fields and filter as JSON
 const getRatingByProduct = async (req, res, next) => {
   try {
     const { id } = req.params
-    const ratings = await ratingService.getRatingsByProductId(id)
+    const { fields, filter } = req.query
+    const selectFields = fields ? fields.split(',') : undefined
+    const filterObj = filter ? JSON.parse(filter) : undefined
+    const ratings = await ratingService.getRatingsByProductId(id, filterObj, selectFields)
     res.status(StatusCodes.OK).json(ratings)
   } catch (error) {
     next(error)
   }
 }
 
+// GET ratings by service with fields and filter as JSON
 const getRatingByService = async (req, res, next) => {
   try {
     const { id } = req.params
-    const ratings = await ratingService.getRatingsByServiceId(id)
+    const { fields, filter } = req.query
+    const selectFields = fields ? fields.split(',') : undefined
+    const filterObj = filter ? JSON.parse(filter) : undefined
+    const ratings = await ratingService.getRatingsByServiceId(id, filterObj, selectFields)
     res.status(StatusCodes.OK).json(ratings)
   } catch (error) {
     next(error)

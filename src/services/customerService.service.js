@@ -158,9 +158,12 @@ const exportServicesToExcel = async () => {
   const worksheet = workbook.addWorksheet('customersService');
 
   worksheet.columns = [
+    { header: 'STT', key: 'stt', width: 5 },
     { header: 'Tên dịch vụ', key: 'name', width: 30 },
     { header: 'Mô tả', key: 'description', width: 40 },
     { header: 'Giá', key: 'price', width: 15 },
+    { header: 'Giảm giá', key: 'discount', width: 15 },
+    { header: 'Giá đã giảm', key: 'salePrice', width: 15 },
     { header: 'Danh mục', key: 'category', width: 25 },
     { header: 'Trạng thái', key: 'status', width: 15 },
 
@@ -187,13 +190,16 @@ const exportServicesToExcel = async () => {
     hidden: 'Đã ẩn',
   };
 
-  customersService.forEach((customersService) => {
-  const statusText = statusMap[customersService.status] || 'Không xác định';
+ customersService.forEach((customersService, index) => {
+    const statusText = statusMap[customersService.status] || 'Không xác định';
 
     worksheet.addRow({
+      stt: index + 1, 
       name: customersService.name,
       description: customersService.description,
-      price: customersService.price,
+      price: customersService.price.toLocaleString() + ' đ',
+      discount: customersService.discount + ' %',
+      salePrice: (customersService.price - (customersService.price * customersService.discount /100)).toLocaleString() + ' đ',
       category: customersService.category_id?.name || '',
       status: statusText,
     });

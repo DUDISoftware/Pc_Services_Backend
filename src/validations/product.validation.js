@@ -31,7 +31,8 @@ const createProduct = async (req, res, next) => {
     size: Joi.string().max(100).trim().optional(),
     panel: Joi.string().max(100).trim().optional(),
     slug: Joi.string().max(200).trim().required(),
-    images: Joi.array().items(Joi.string().uri()).optional()
+    images: Joi.array().items(Joi.string().uri()).optional(),
+    discount: Joi.number().min(0).max(100).optional(),
   })
 
   try {
@@ -60,7 +61,9 @@ const updateProduct = async (req, res, next) => {
     size: Joi.string().max(100).trim().optional(),
     panel: Joi.string().max(100).trim().optional(),
     slug: Joi.string().max(200).trim().required(),
-    images: Joi.array().items(Joi.string().uri()).optional()
+    images: Joi.array().items(Joi.string().uri()).optional(),
+    discount: Joi.number().min(0).max(100).optional(),
+
   })
 
   try {

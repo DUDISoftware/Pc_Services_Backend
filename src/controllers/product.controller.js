@@ -47,7 +47,9 @@ const updateProduct = async (req, res, next) => {
   try {
     const { id } = req.params
     const files = req.files
-    const updatedProduct = await productService.updateProduct(id, req.body, files)
+ 
+
+    const updatedProduct = await productService.updateProduct(id, req.body, files)     
     res.status(StatusCodes.OK).json({
       status: 'success',
       message: 'Cập nhật product thành công',

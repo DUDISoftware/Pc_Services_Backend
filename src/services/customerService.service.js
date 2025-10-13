@@ -102,7 +102,6 @@ const getFeaturedServices = async (limit = 4) => {
   try {
     let keys = []
     let cursor = '0'
-
     do {
       const reply = await redisClient.scan(cursor, {
         MATCH: 'service:*:views',

@@ -7,18 +7,18 @@ import { env } from '~/config/environment.js'
 import { APIs } from '~/routes/index.js'
 import { errorHandler } from '~/middlewares/error.middleware.js'
 import bodyParser from 'body-parser'
-import { startDailyStatsCron } from './cron/updateStats.cron.js';
+import { startDailyStatsCron } from './cron/updateStats.cron.js'
 
 const APP_HOST = env.APP_HOST || 'localhost'
 const APP_PORT = env.APP_PORT || 5000
 
 const START_SERVER = async () => {
-const app = express()
-const cors = require('cors')
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true
-}))
+  const app = express()
+  const cors = require('cors')
+  app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+  }))
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
@@ -33,7 +33,7 @@ app.use(cors({
   console.log('Connecting to database...')
   await CONNECT_DB()
   console.log('Database connected successfully')
-  startDailyStatsCron();
+  startDailyStatsCron()
   console.log('Connecting to Redis')
   await CONNECT_REDIS()
   console.log('Redis connected')

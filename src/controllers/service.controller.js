@@ -172,6 +172,17 @@ const getFeaturedServices = async (req, res, next) => {
   }
 }
 
+const exportServicesToExcel = async (req, res, next) => {
+  try {
+    const buffer = await serviceService.exportServicesToExcel()
+    res.setHeader('Content-Disposition', 'attachment; filename=services.xlsx')
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    res.status(StatusCodes.OK).send(buffer)
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const serviceController = {
   createService,
   updateService,
@@ -183,5 +194,6 @@ export const serviceController = {
   searchServices,
   countViewRedis,
   getServiceViews,
-  getFeaturedServices
+  getFeaturedServices,
+  exportServicesToExcel
 }

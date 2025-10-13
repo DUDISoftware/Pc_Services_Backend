@@ -40,11 +40,11 @@ const hideRequest = async (id) => {
   }
 }
 
-const getAllRequests = async (page = 1, limit = 10) => {
+const getAllRequests = async (page = 1, limit = 10, filter={}) => {
   try {
     const skip = (page - 1) * limit
-    return await Order.find()
-      .populate('items.product_id', 'name price images')
+    return await Order.find(filter)
+      .populate('items.product_id', 'name price quantity images')
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
@@ -56,7 +56,7 @@ const getAllRequests = async (page = 1, limit = 10) => {
 const getRequestById = async (id) => {
   try {
     const request = await Order.findById(id)
-      .populate('items.product_id', 'name price images')
+      .populate('items.product_id', 'name price quantity images')
     if (!request) throw new ApiError(StatusCodes.NOT_FOUND, 'Request not found')
     return request
   } catch (error) {

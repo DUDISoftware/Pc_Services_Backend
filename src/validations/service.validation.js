@@ -18,27 +18,26 @@ const slugValidationRule = Joi.object({
 })
 
 /**
- * Rule validate Service Body
- */
-const serviceBodySchema = Joi.object({
-  name: Joi.string().max(100).required(),
-  description: Joi.string().max(2000).required(),
-  price: Joi.number().positive().required(),
-  type: Joi.string().valid('at_home', 'at_store').default('at_store'),
-  estimated_time: Joi.string().max(50).required(),
-  status: Joi.string().valid('active', 'inactive', 'hidden').default('active'),
-  category_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
-  slug: Joi.string().max(100).required(),
-  discount: Joi.number().min(0).max(100).optional(),
-
-})
-
-/**
  * CREATE service
  */
 const createService = async (req, res, next) => {
+  const createServiceRule = Joi.object({
+    name: Joi.string().max(100).required(),
+    description: Joi.string().max(2000).required(),
+    price: Joi.number().positive().required(),
+    type: Joi.string().valid('at_home', 'at_store').default('at_store'),
+    estimated_time: Joi.string().max(50).required(),
+    status: Joi.string().valid('active', 'inactive', 'hidden').default('active'),
+    category_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
+    slug: Joi.string().max(100).required(),
+    images: Joi.array().items(Joi.string().uri()).optional()
+  })
   try {
-    const validated = await serviceBodySchema.validateAsync(req.body || {}, { abortEarly: false })
+    const data = req.body || {}
+    // if (req.files && req.files.length > 0) {
+    //   data.images = req.files.map(file => file.path)
+    // }
+    const validated = await createServiceRule.validateAsync(data, { abortEarly: false })
     req.body = validated
     next()
   } catch (error) {
@@ -50,11 +49,28 @@ const createService = async (req, res, next) => {
  * UPDATE service
  */
 const updateService = async (req, res, next) => {
+  const updatedServiceRule = Joi.object({
+    name: Joi.string().max(100).optional(),
+    description: Joi.string().max(2000).optional(),
+    price: Joi.number().positive().optional(),
+    type: Joi.string().valid('at_home', 'at_store').default('at_store').optional(),
+    estimated_time: Joi.string().max(50).optional(),
+    status: Joi.string().valid('active', 'inactive', 'hidden').default('active').optional(),
+    category_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).optional(),
+    slug: Joi.string().max(100).optional(),
+    images: Joi.array().items(Joi.string().uri()).optional()
+  })
   try {
-    const validatedParams = await idValidationRule.validateAsync(req.params || {}, { abortEarly: false })
-    const validatedBody = await serviceBodySchema.validateAsync(req.body || {}, { abortEarly: false })
+    const params = req.params || {}
+    const body = req.body || {}
+    // if (req.files && req.files.length > 0) {
+    //   body.images = req.files.map(file => ({url: file.path, public_id: file.filename}))
+    // }
+    const validatedParams = await idValidationRule.validateAsync(params, { abortEarly: false })
+    const validatedBody = await updatedServiceRule.validateAsync(body, { abortEarly: false })
     req.params = validatedParams
     req.body = validatedBody
+
     next()
   } catch (error) {
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message))

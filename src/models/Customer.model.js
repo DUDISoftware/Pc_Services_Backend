@@ -1,3 +1,4 @@
+
 import mongoose from 'mongoose'
 
 const schemaOptions = {
@@ -8,15 +9,15 @@ const schemaOptions = {
     versionKey: false
   }
 }
-const customerSchema = new mongoose.Schema({
- name: {
+
+const CustomerSchema = new mongoose.Schema({
+  name: {
     type: String,
-    index: true,
     required: true,
-    unique: true,
-    trim: true
+    trim: true,
+    maxLength: 100
   },
-  email: { 
+  email: {
     type: String,
     required: false,
     unique: true,
@@ -25,12 +26,16 @@ const customerSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: false,
+    required: true,
+    unique: true,
     trim: true,
-    maxLength: 15
+    maxLength: 11
   }
-}, schemaOptions);
+}, schemaOptions)
 
-const CustomerModel = mongoose.model('customers', customerSchema);
+CustomerSchema.index({ name: 'text', email: 'text', phone: 'text' })
 
-export default CustomerModel;
+const Customer = mongoose.model('Customer', CustomerSchema)
+
+export default Customer
+

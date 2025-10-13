@@ -39,6 +39,16 @@ const updateQuantity = async (id, quantity) => {
   return updated
 }
 
+const updateStatus = async (id, status) => {
+  const updated = await ProductModel.findByIdAndUpdate(
+    id,
+    { status },
+    { new: true }
+  )
+  if (!updated) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
+  return updated
+}
+
 const deleteProduct = async (id) => {
   const result = await ProductModel.findByIdAndDelete(id)
   if (!result) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
@@ -48,14 +58,14 @@ const deleteProduct = async (id) => {
   return result
 }
 
-const getAllProducts = async (page = 1, limit = 10) => {
+const getAllProducts = async (page = 1, limit = 10, filter = {}) => {
   const skip = (page - 1) * limit
-  const products = await ProductModel.find()
+  const products = await ProductModel.find(filter)
     .populate('category_id', 'name slug')
     .skip(skip)
     .limit(limit)
     .sort({ createdAt: -1 })
-  const total = await ProductModel.countDocuments()
+  const total = await ProductModel.countDocuments(filter)
   return {
     status: 'success',
     page,
@@ -72,7 +82,7 @@ const getFeaturedProducts = async (limit = 4) => {
   do {
     const reply = await redisClient.scan(cursor, {
       MATCH: 'product:*:views',
-      COUNT: 100
+      COUNT: 10
     })
     cursor = reply.cursor
     keys.push(...reply.keys)
@@ -212,6 +222,7 @@ export const productService = {
   createProduct,
   updateProduct,
   updateQuantity,
+  updateStatus,
   deleteProduct,
   getAllProducts,
   getProductById,
@@ -219,6 +230,7 @@ export const productService = {
   getFeaturedProducts,
   getRelatedProducts,
   getProductBySlug,
+  getQuantity,
   getProductViews,
   countViewRedis,
   exportProductsToExcel

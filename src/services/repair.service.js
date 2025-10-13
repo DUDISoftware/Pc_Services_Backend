@@ -58,13 +58,14 @@ const hideRequest = async (id) => {
   }
 }
 
-const getAllRequests = async (page = 1, limit = 10) => {
+const getAllRequests = async (page = 1, limit = 10, filter={}) => {
   try {
     const skip = (page - 1) * limit
-    return await Repair.find()
+    return await Repair.find(filter)
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 })
+      .populate('service_id', 'name price')
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }

@@ -12,15 +12,15 @@ const createRating = async (reqBody) => {
   }
 }
 
-const getRatingsByProductId = async (id, page = 1, limit = 10) => {
+const getRatingsByProductId = async (id, page = 1, limit = 10, filter = {}) => {
   const skip = (page - 1) * limit
   try {
     const [ratings, total] = await Promise.all([
-      Rating.find({ product_id: id })
+      Rating.find({ product_id: id, ...filter })
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 }),
-      Rating.countDocuments({ product_id: id })
+      Rating.countDocuments({ product_id: id, ...filter })
     ])
     return {
       ratings,
@@ -33,15 +33,15 @@ const getRatingsByProductId = async (id, page = 1, limit = 10) => {
   }
 }
 
-const getRatingsByServiceId = async (id, page = 1, limit = 10) => {
+const getRatingsByServiceId = async (id, page = 1, limit = 10, filter = {}) => {
   const skip = (page - 1) * limit
   try {
     const [ratings, total] = await Promise.all([
-      Rating.find({ service_id: id })
+      Rating.find({ service_id: id, ...filter })
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 }),
-      Rating.countDocuments({ service_id: id })
+      Rating.countDocuments({ service_id: id, ...filter })
     ])
     return {
       ratings,

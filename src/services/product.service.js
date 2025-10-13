@@ -24,8 +24,9 @@ const updateProduct = async (id, reqBody, files) => {
     }))
   }
   const updated = await ProductModel.findByIdAndUpdate(id, updateData, { new: true })
+   .populate('category_id', 'name')
   if (!updated) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
-  return updated
+  return updated  
 }
 
 const updateQuantity = async (id, quantity) => {
@@ -156,11 +157,14 @@ const exportProductsToExcel = async () => {
   const worksheet = workbook.addWorksheet('Products');
 
   worksheet.columns = [
+    { header: 'STT', key: 'stt', width: 5 },
     { header: 'Tên sản phẩm', key: 'name', width: 30 },
-    { header: 'Giá', key: 'price', width: 15 },
+    { header: 'Mô tả', key: 'description', width: 40 },
+    { header: 'Giá gốc', key: 'price', width: 15 },
+    { header: 'Giảm giá', key: 'discount', width: 15 },
+    { header: 'Giá đã giảm', key: 'salePrice', width: 15 },
     { header: 'Danh mục', key: 'brand', width: 15},
     { header: 'Số lượng', key: 'quantity', width: 15 },
-    { header: 'Mô tả', key: 'description', width: 40 },
     { header: 'Trạng thái', key: 'statuss', width: 15 },
   ];
     worksheet.getRow(1).eachCell((cell) => {
@@ -185,13 +189,16 @@ const exportProductsToExcel = async () => {
     hidden: 'Đã ẩn',
   };
 
-  products.forEach((product) => {
+  products.forEach((product, index) => {
     const statusText = statusMap[product.status] || 'Không xác định';
 
     worksheet.addRow({
+      stt: index + 1, 
       name: product.name,
       description: product.description,
-      price: product.price,
+      price: product.price.toLocaleString() + ' đ',
+      discount: product.discount + ' %',
+      salePrice: (product.price - (product.price * product.discount / 100)).toLocaleString() + ' đ',
       brand: product.brand,
       quantity: product.quantity,
       statuss: statusText,

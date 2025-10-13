@@ -28,7 +28,9 @@ const serviceBodySchema = Joi.object({
   estimated_time: Joi.string().max(50).required(),
   status: Joi.string().valid('active', 'inactive', 'hidden').default('active'),
   category_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
-  slug: Joi.string().max(100).required()
+  slug: Joi.string().max(100).required(),
+  discount: Joi.number().min(0).max(100).optional(),
+
 })
 
 /**

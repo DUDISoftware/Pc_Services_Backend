@@ -11,7 +11,6 @@ import { ratingRoute } from './rating.routes.js'
 import { statsRoute } from './stats.routes.js'
 import { infoRoute } from './info.routes.js'
 import { customerRoute } from './customer.routes.js'
-import { discountRoute } from './discount.routes.js'
 
 const Router = express.Router()
 
@@ -31,5 +30,4 @@ Router.use('/ratings', ratingRoute)
 Router.use('/stats', statsRoute)
 Router.use('/info', infoRoute)
 Router.use('/customers', customerRoute)
-Router.use('/discounts', discountRoute)
 export const APIs = Router

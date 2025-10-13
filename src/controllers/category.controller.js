@@ -15,16 +15,37 @@ const createCategory = async (req, res, next) => {
   }
 }
 
+// GET /categories?fields=name,slug&page=1&limit=10
 const getCategories = async (req, res, next) => {
   try {
-    let { page = 1, limit = 10 } = req.query
+    let { page = 1, limit = 10, fields, filter } = req.query
     page = parseInt(page)
     limit = parseInt(limit)
 
-    const data = await categoryService.getCategories(page, limit)
+    // Parse fields to array if provided
+    let selectFields = undefined
+    if (fields) {
+      selectFields = fields.split(',').map(f => f.trim())
+    }
+
+    let filterObj = undefined
+    if (filter) {
+      try {
+        filterObj = JSON.parse(filter)
+      } catch (e) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          status: 'fail',
+          message: 'Filter parameter must be valid JSON'
+        })
+      }
+    }
+
+    const data = await categoryService.getCategories(page, limit, filterObj, selectFields)
 
     res.status(StatusCodes.OK).json({
       status: 'success',
+      fields: selectFields || null,
+      filter: filterObj || null,
       ...data // { page, limit, total, totalPages, categories }
     })
   } catch (error) {
@@ -32,12 +53,19 @@ const getCategories = async (req, res, next) => {
   }
 }
 
+// GET /categories/:id?fields=name,slug
 const getCategoryById = async (req, res, next) => {
   try {
     const { id } = req.params
-    const category = await categoryService.getCategoryById(id)
+    const { fields } = req.query
+    let selectFields = undefined
+    if (fields) {
+      selectFields = fields.split(',').map(f => f.trim())
+    }
+    const category = await categoryService.getCategoryById(id, selectFields)
     res.status(StatusCodes.OK).json({
       status: 'success',
+      fields: selectFields || null,
       category
     })
   } catch (error) {
@@ -45,12 +73,19 @@ const getCategoryById = async (req, res, next) => {
   }
 }
 
+// GET /categories/slug/:slug?fields=name,slug
 const getCategoryBySlug = async (req, res, next) => {
   try {
     const { slug } = req.params
-    const category = await categoryService.getCategoryBySlug(slug)
+    const { fields } = req.query
+    let selectFields = undefined
+    if (fields) {
+      selectFields = fields.split(',').map(f => f.trim())
+    }
+    const category = await categoryService.getCategoryBySlug(slug, selectFields)
     res.status(StatusCodes.OK).json({
       status: 'success',
+      fields: selectFields || null,
       category
     })
   } catch (error) {
@@ -85,9 +120,10 @@ const deleteCategory = async (req, res, next) => {
   }
 }
 
+// GET /categories/search?query=abc&page=1&limit=10&fields=name,slug&filter={"status":"active"}
 const searchCategories = async (req, res, next) => {
   try {
-    const { query } = req.query
+    const { query, fields, filter } = req.query
     if (!query || query.trim() === '') {
       return res.status(StatusCodes.BAD_REQUEST).json({
         status: 'fail',
@@ -97,11 +133,31 @@ const searchCategories = async (req, res, next) => {
     let { page = 1, limit = 10 } = req.query
     page = parseInt(page)
     limit = parseInt(limit)
-    const categories = await searchService(query, page, limit)
+
+    let selectFields = undefined
+    if (fields) {
+      selectFields = fields.split(',').map(f => f.trim())
+    }
+
+    let filterObj = undefined
+    if (filter) {
+      try {
+        filterObj = JSON.parse(filter)
+      } catch (e) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          status: 'fail',
+          message: 'Filter parameter must be valid JSON'
+        })
+      }
+    }
+
+    const categories = await searchService(query, page, limit, filterObj, selectFields)
     res.status(StatusCodes.OK).json({
       status: 'success',
       page,
       limit,
+      fields: selectFields || null,
+      filter: filterObj || null,
       results: categories.length,
       categories
     })

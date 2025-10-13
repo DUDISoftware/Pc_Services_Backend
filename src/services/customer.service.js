@@ -1,4 +1,3 @@
-
 import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
 import CustomerModel from '~/models/Customer.model'
@@ -22,7 +21,7 @@ const getAllCustomers = async (page = 1, limit = 10, filter = {}, field = '') =>
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .select(field),
+        .select(field || undefined),
       CustomerModel.countDocuments(filter)
     ])
     return {
@@ -37,9 +36,9 @@ const getAllCustomers = async (page = 1, limit = 10, filter = {}, field = '') =>
   }
 }
 
-const getCustomerById = async (id) => {
+const getCustomerById = async (id, field = '') => {
   try {
-    const customer = await CustomerModel.findById(id)
+    const customer = await CustomerModel.findById(id).select(field || undefined)
     if (!customer) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Customer not found')
     }
@@ -80,4 +79,3 @@ export const customerService = {
   updateCustomer,
   deleteCustomer
 }
-

@@ -3,12 +3,20 @@ import { infoService } from '~/services/info.service.js'
 
 const getAll = async (req, res, next) => {
   try {
-    const infos = await infoService.get()
+    // Extract fields and filter from query parameters
+    const { fields, filter } = req.query
+    // Parse fields as array, filter as JSON if provided
+    const selectedFields = fields ? fields.split(',') : undefined
+    const filterObj = filter ? JSON.parse(filter) : undefined
+
+    // Pass filter and fields directly, not as an object
+    const infos = await infoService.get(filterObj, selectedFields)
     res.status(StatusCodes.OK).json(infos)
   } catch (error) {
     next(error)
   }
 }
+
 const create = async (req, res, next) => {
   try {
     const result = await infoService.create(req.body, req.files)

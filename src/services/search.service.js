@@ -9,8 +9,9 @@ import { redisClient } from '~/config/redis.js'
 
 const CACHE_EXPIRE_SECONDS = 3 * 3600 // 3 hours
 
-async function getCachedResults(type, query, page, limit) {
-  const cacheKey = `search:${type}:${query}:${page}:${limit}`
+async function getCachedResults(type, query, page, limit, fields = null) {
+  const fieldsKey = fields ? JSON.stringify(fields) : ''
+  const cacheKey = `search:${type}:${query}:${page}:${limit}:${fieldsKey}`
   try {
     const cached = await redisClient.get(cacheKey)
     return cached ? JSON.parse(cached) : null
@@ -20,8 +21,9 @@ async function getCachedResults(type, query, page, limit) {
   }
 }
 
-async function setCachedResults(type, query, page, limit, results) {
-  const cacheKey = `search:${type}:${query}:${page}:${limit}`
+async function setCachedResults(type, query, page, limit, results, fields = null) {
+  const fieldsKey = fields ? JSON.stringify(fields) : ''
+  const cacheKey = `search:${type}:${query}:${page}:${limit}:${fieldsKey}`
   try {
     await redisClient.set(cacheKey, JSON.stringify(results))
     await redisClient.expire(cacheKey, CACHE_EXPIRE_SECONDS)
@@ -34,17 +36,23 @@ function buildRegex(query) {
   return new RegExp(query, 'i')
 }
 
-async function searchProducts(query, page = 1, limit = 10, filter = {}) {
+async function searchProducts(query, page = 1, limit = 10, filter = {}, fields = null) {
   const skip = (page - 1) * limit
-  const cached = await getCachedResults('products', query, page, limit)
+  const cached = await getCachedResults('products', query, page, limit, fields)
   if (cached) {
-    if (cached.products) {
-      return cached.products
-    }
-  }
+    const products = cached.products || []
+    // Nếu filter rỗng → không cần lọc
+    const results = Object.keys(filter).length === 0
+      ? products
+      : products.filter(prod => {
+        return Object.entries(filter).every(([key, value]) => {
+          return prod[key] != null && prod[key] == value
+        })
+      })
 
+    return { ...cached, products: results }
+  }
   const regex = buildRegex(query)
-  let Allproducts = []
   try {
     // Find matching categories and collect their IDs
     const category = await CategoryModel.find({
@@ -54,32 +62,43 @@ async function searchProducts(query, page = 1, limit = 10, filter = {}) {
         { description: regex }
       ],
       ...filter
-    }, { _id: 1 }) // Only select _id
+    }, { _id: 1 })
     const category_ids = category.map(cat => cat._id)
 
-    // Find products directly by name, tags, brand, description
-    const products = await ProductModel.find({
+    // Find products directly by name, tags, brand, description, or category
+    const queryObj = {
       $or: [
         { name: regex },
         { tags: regex },
-        { category_id: category_ids },
+        { category_id: { $in: category_ids } },
         { brand: regex },
         { description: regex }
       ],
       ...filter
-    }).skip(skip).limit(limit)
-    Allproducts.push(...products)
-    await setCachedResults('products', query, page, limit, Allproducts)
-    return Allproducts
+    }
+
+    const total = await ProductModel.countDocuments(queryObj)
+    const products = await ProductModel.find(queryObj, fields).skip(skip).limit(limit)
+
+    const result = {
+      products,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    }
+
+    await setCachedResults('products', query, page, limit, result, fields)
+    return result
   } catch (error) {
     console.error('searchProducts error:', error)
-    return []
+    return { products: [], total: 0, page, limit, totalPages: 0 }
   }
 }
 
-async function searchCategories(query, page = 1, limit = 10, filter = {}) {
+async function searchCategories(query, page = 1, limit = 10, filter = {}, fields = null) {
   const skip = (page - 1) * limit
-  const cached = await getCachedResults('categories', query, page, limit)
+  const cached = await getCachedResults('categories', query, page, limit, fields)
   if (cached) return cached
 
   const regex = buildRegex(query)
@@ -90,8 +109,8 @@ async function searchCategories(query, page = 1, limit = 10, filter = {}) {
         { description: regex }
       ],
       ...filter
-    }).skip(skip).limit(limit)
-    await setCachedResults('categories', query, page, limit, categories)
+    }, fields).skip(skip).limit(limit)
+    await setCachedResults('categories', query, page, limit, categories, fields)
     return categories
   } catch (error) {
     console.error('searchCategories error:', error)
@@ -99,9 +118,9 @@ async function searchCategories(query, page = 1, limit = 10, filter = {}) {
   }
 }
 
-async function searchServices(query, page = 1, limit = 10, filter = {}) {
+async function searchServices(query, page = 1, limit = 10, filter = {}, fields = null) {
   const skip = (page - 1) * limit
-  const cached = await getCachedResults('services', query, page, limit)
+  const cached = await getCachedResults('services', query, page, limit, fields)
   if (cached) return cached
 
   const regex = buildRegex(query)
@@ -113,8 +132,8 @@ async function searchServices(query, page = 1, limit = 10, filter = {}) {
         { slug: regex }
       ],
       ...filter
-    }).skip(skip).limit(limit)
-    await setCachedResults('services', query, page, limit, services)
+    }, fields).skip(skip).limit(limit)
+    await setCachedResults('services', query, page, limit, services, fields)
     return services
   } catch (error) {
     console.error('searchServices error:', error)
@@ -122,9 +141,9 @@ async function searchServices(query, page = 1, limit = 10, filter = {}) {
   }
 }
 
-async function searchServiceCategories(query, page = 1, limit = 10, filter = {}) {
+async function searchServiceCategories(query, page = 1, limit = 10, filter = {}, fields = null) {
   const skip = (page - 1) * limit
-  const cached = await getCachedResults('service_categories', query, page, limit)
+  const cached = await getCachedResults('service_categories', query, page, limit, fields)
   if (cached) return cached
 
   const regex = buildRegex(query)
@@ -135,8 +154,8 @@ async function searchServiceCategories(query, page = 1, limit = 10, filter = {})
         { description: regex }
       ],
       ...filter
-    }).skip(skip).limit(limit)
-    await setCachedResults('service_categories', query, page, limit, categories)
+    }, fields).skip(skip).limit(limit)
+    await setCachedResults('service_categories', query, page, limit, categories, fields)
     return categories
   } catch (error) {
     console.error('searchServiceCategories error:', error)
@@ -144,7 +163,7 @@ async function searchServiceCategories(query, page = 1, limit = 10, filter = {})
   }
 }
 
-async function searchRequests(query, page = 1, limit = 10, filter = {}) {
+async function searchRequests(query, page = 1, limit = 10, filter = {}, fields = null) {
   const skip = (page - 1) * limit
   const regex = buildRegex(query)
   try {
@@ -157,7 +176,7 @@ async function searchRequests(query, page = 1, limit = 10, filter = {}) {
         { problem_description: regex }
       ],
       ...filter
-    }).skip(skip).limit(limit)
+    }, fields).skip(skip).limit(limit)
 
     const order = await Order.find({
       $or: [
@@ -168,7 +187,7 @@ async function searchRequests(query, page = 1, limit = 10, filter = {}) {
         { note: regex }
       ],
       ...filter
-    }).skip(skip).limit(limit)
+    }, fields).skip(skip).limit(limit)
 
     return { repair, order }
   } catch (error) {

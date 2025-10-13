@@ -45,10 +45,16 @@ const hideRequest = async (req, res, next) => {
 
 const getAllRequests = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, filter = {} } = req.query
-    const requests = await repairService.getAllRequests(Number(page), Number(limit), filter)
+    const { page = 1, limit = 10, filter = {}, fields = '' } = req.query
+    const filterObj = typeof filter === 'string' ? JSON.parse(filter) : filter
+    const selectFields = fields ? fields.split(',') : undefined
+    const requests = await repairService.getAllRequests(Number(page), Number(limit), filterObj, selectFields)
     res.status(StatusCodes.OK).json({
       status: 'success',
+      page: Number(page),
+      limit: Number(limit),
+      filter: filterObj,
+      fields: fields.split(','),
       requests
     })
   } catch (error) {
@@ -59,15 +65,19 @@ const getAllRequests = async (req, res, next) => {
 const getRequestById = async (req, res, next) => {
   try {
     const { id } = req.params
-    const request = await repairService.getRequestById(id)
+    const { fields = '' } = req.query
+    const selectFields = fields ? fields.split(',') : undefined
+    const request = await repairService.getRequestById(id, selectFields)
     if (!request) {
       return res.status(StatusCodes.NOT_FOUND).json({
         status: 'error',
-        message: 'Yêu cầu không tồn tại'
+        message: 'Yêu cầu không tồn tại',
+        id
       })
     }
     res.status(StatusCodes.OK).json({
       status: 'success',
+      id,
       request
     })
   } catch (error) {
@@ -81,6 +91,9 @@ const searchRequests = async (req, res, next) => {
     const results = await searchService(query, Number(page), Number(limit))
     res.status(StatusCodes.OK).json({
       status: 'success',
+      query,
+      page: Number(page),
+      limit: Number(limit),
       results
     })
   } catch (error) {
@@ -95,6 +108,9 @@ const getRequestsByService = async (req, res, next) => {
     const requests = await repairService.getRequestsByService(serviceId, Number(page), Number(limit))
     res.status(StatusCodes.OK).json({
       status: 'success',
+      serviceId,
+      page: Number(page),
+      limit: Number(limit),
       requests
     })
   } catch (error) {
@@ -109,6 +125,9 @@ const getRequestsByStatus = async (req, res, next) => {
     const requests = await repairService.getRequestsByStatus(status, Number(page), Number(limit))
     res.status(StatusCodes.OK).json({
       status: 'success',
+      statusParam: status,
+      page: Number(page),
+      limit: Number(limit),
       requests
     })
   } catch (error) {
@@ -122,7 +141,8 @@ const deleteRequest = async (req, res, next) => {
     await repairService.deleteRequest(id)
     res.status(StatusCodes.OK).json({
       status: 'success',
-      message: 'Xóa yêu cầu thành công'
+      message: 'Xóa yêu cầu thành công',
+      id
     })
   } catch (error) {
     next(error)

@@ -19,14 +19,17 @@ const createCategory = async (reqBody) => {
 /**
  * Get all categories with pagination
  */
-const getCategories = async (page = 1, limit = 10, filter = {}) => {
+const getCategories = async (page = 1, limit = 10, filter = {}, fields) => {
   try {
     page = Number(page) || 1
     limit = Number(limit) || 10
     const skip = (page - 1) * limit
 
     const [categories, total] = await Promise.all([
-      CategoryModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      CategoryModel.find(filter).sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .select(fields),
       CategoryModel.countDocuments(filter)
     ])
 
@@ -45,9 +48,9 @@ const getCategories = async (page = 1, limit = 10, filter = {}) => {
 /**
  * Get category by id
  */
-const getCategoryById = async (id) => {
+const getCategoryById = async (id, fields) => {
   try {
-    const category = await CategoryModel.findById(id)
+    const category = await CategoryModel.findById(id).select(fields)
     if (!category) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found')
     }
@@ -60,9 +63,9 @@ const getCategoryById = async (id) => {
 /**
  * Get category by slug
  */
-const getCategoryBySlug = async (slug) => {
+const getCategoryBySlug = async (slug, fields) => {
   try {
-    const category = await CategoryModel.findOne({ slug })
+    const category = await CategoryModel.findOne({ slug }).select(fields)
     if (!category) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Category not found')
     }

@@ -28,8 +28,10 @@ const createStats = async (req, res, next) => {
 
 const getAllStats = async (req, res, next) => {
   try {
-    const stats = await statsService.getAllStats()
-    res.status(StatusCodes.OK).json({ status: 'success', stats })
+    const fields = req.query.fields ? req.query.fields.split(',') : null
+
+    const stats = await statsService.getAllStats(null, fields)
+    res.status(StatusCodes.OK).json({ status: 'success', stats, fields })
   } catch (error) {
     next(error)
   }
@@ -38,8 +40,10 @@ const getAllStats = async (req, res, next) => {
 const getStatsByMonth = async (req, res, next) => {
   try {
     const { month, year } = req.params
-    const stats = await statsService.getStatsByMonth(Number(month), Number(year))
-    res.status(StatusCodes.OK).json({ status: 'success', stats })
+    const fields = req.query.fields ? req.query.fields.split(',') : null
+
+    const stats = await statsService.getStatsByMonth(month, year, fields)
+    res.status(StatusCodes.OK).json({ status: 'success', stats, fields })
   } catch (error) {
     next(error)
   }
@@ -47,11 +51,11 @@ const getStatsByMonth = async (req, res, next) => {
 
 const getStatsByDate = async (req, res, next) => {
   try {
-    const { date } = req.params;
-    const parsedDate = parseValidDate(date);
+    const { date } = req.params
+    const fields = req.query.fields ? req.query.fields.split(',') : null
 
-    const stats = await statsService.getStatsByDate(parsedDate);
-    res.status(StatusCodes.OK).json({ status: 'success', stats });
+    const stats = await statsService.getStatsByDate(date, fields)
+    res.status(StatusCodes.OK).json({ status: 'success', stats, fields })
   } catch (error) {
     next(error)
   }
@@ -59,9 +63,11 @@ const getStatsByDate = async (req, res, next) => {
 
 const getCurrentStats = async (req, res, next) => {
   try {
-    const today = new Date();
-    const stats = await statsService.getCurrentStats(today);
-    res.status(StatusCodes.OK).json({ status: 'success', stats });
+    const fields = req.query.fields ? req.query.fields.split(',') : null
+    const today = new Date()
+
+    const stats = await statsService.getCurrentStats({ date: today }, fields)
+    res.status(StatusCodes.OK).json({ status: 'success', stats, fields })
   } catch (error) {
     next(error)
   }

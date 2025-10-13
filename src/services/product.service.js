@@ -57,9 +57,10 @@ const deleteProduct = async (id) => {
   return result
 }
 
-const getAllProducts = async (page = 1, limit = 10, filter = {}) => {
+const getAllProducts = async (page = 1, limit = 10, filter = {}, fields = '') => {
   const skip = (page - 1) * limit
   const products = await ProductModel.find(filter)
+    .select(fields)
     .populate('category_id', 'name slug')
     .skip(skip)
     .limit(limit)
@@ -75,7 +76,7 @@ const getAllProducts = async (page = 1, limit = 10, filter = {}) => {
   }
 }
 
-const getFeaturedProducts = async (limit = 4) => {
+const getFeaturedProducts = async (limit = 4, fields = '') => {
   const keys = []
   let cursor = '0'
   do {
@@ -97,10 +98,18 @@ const getFeaturedProducts = async (limit = 4) => {
     }
   })
   featured.sort((a, b) => b.views - a.views)
-  return featured.slice(0, limit)
+  const topIds = featured.slice(0, limit).map(f => f.id)
+  const products = await ProductModel.find({ _id: { $in: topIds } })
+    .select(fields)
+    .populate('category_id', 'name slug')
+  // Map views to products
+  return products.map(product => ({
+    ...product.toObject(),
+    views: featured.find(f => f.id === String(product._id))?.views || 0
+  }))
 }
 
-const getRelatedProducts = async (productId, limit = 4) => {
+const getRelatedProducts = async (productId, limit = 4, fields = '') => {
   const product = await ProductModel.findById(productId)
   if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
   const related = await ProductModel.find({
@@ -108,20 +117,24 @@ const getRelatedProducts = async (productId, limit = 4) => {
     _id: { $ne: productId },
     status: 'available'
   })
+    .select(fields)
     .limit(limit)
     .sort({ createdAt: -1 })
   return related
 }
 
-const getProductById = async (id) => {
-  const product = await ProductModel.findById(id).populate('category_id', 'name')
+const getProductById = async (id, fields = '') => {
+  const product = await ProductModel.findById(id)
+    .select(fields)
+    .populate('category_id', 'name')
   if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
   return product
 }
 
-const getProductsByCategory = async (categoryId, page = 1, limit = 10) => {
+const getProductsByCategory = async (categoryId, page = 1, limit = 10, fields = '') => {
   const skip = (page - 1) * limit
   const products = await ProductModel.find({ category_id: categoryId })
+    .select(fields)
     .populate('category_id', 'name slug')
     .skip(skip)
     .limit(limit)
@@ -137,8 +150,10 @@ const getProductsByCategory = async (categoryId, page = 1, limit = 10) => {
   }
 }
 
-const getProductBySlug = async (slug) => {
-  const product = await ProductModel.findOne({ slug }).populate('category_id', 'name slug')
+const getProductBySlug = async (slug, fields = '') => {
+  const product = await ProductModel.findOne({ slug })
+    .select(fields)
+    .populate('category_id', 'name slug')
   if (!product) throw new ApiError(StatusCodes.NOT_FOUND, 'Product not found')
   return product
 }

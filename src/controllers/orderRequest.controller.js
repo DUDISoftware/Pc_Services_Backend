@@ -45,10 +45,26 @@ const hideRequest = async (req, res, next) => {
 
 const getAllRequests = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, filter = {} } = req.query
-    const requests = await orderService.getAllRequests(Number(page), Number(limit), filter)
+    const { page = 1, limit = 10, filter, fields } = req.query
+    let filterObj = {}
+    let fieldsArr
+    if (filter) {
+      try {
+        filterObj = JSON.parse(filter)
+      } catch (e) {
+        filterObj = {}
+      }
+    }
+    if (fields) {
+      fieldsArr = fields.split(',').map(f => f.trim())
+    }
+    const requests = await orderService.getAllRequests(Number(page), Number(limit), filterObj, fieldsArr)
     res.status(StatusCodes.OK).json({
       status: 'success',
+      page: Number(page),
+      limit: Number(limit),
+      filter: filterObj,
+      fields: fieldsArr,
       requests
     })
   } catch (error) {
@@ -59,9 +75,16 @@ const getAllRequests = async (req, res, next) => {
 const getRequestById = async (req, res, next) => {
   try {
     const { id } = req.params
-    const request = await orderService.getRequestById(id)
+    const { fields } = req.query
+    let fieldsArr
+    if (fields) {
+      fieldsArr = fields.split(',').map(f => f.trim())
+    }
+    const request = await orderService.getRequestById(id, fieldsArr)
     res.status(StatusCodes.OK).json({
       status: 'success',
+      id,
+      fields: fieldsArr,
       request
     })
   } catch (error) {
@@ -71,10 +94,18 @@ const getRequestById = async (req, res, next) => {
 
 const searchRequests = async (req, res, next) => {
   try {
-    const { query, page = 1, limit = 10 } = req.query
-    const results = await searchService(query, Number(page), Number(limit))
+    const { query, page = 1, limit = 10, fields } = req.query
+    let fieldsArr
+    if (fields) {
+      fieldsArr = fields.split(',').map(f => f.trim())
+    }
+    const results = await searchService(query, Number(page), Number(limit), fieldsArr)
     res.status(StatusCodes.OK).json({
       status: 'success',
+      query,
+      page: Number(page),
+      limit: Number(limit),
+      fields: fieldsArr,
       results
     })
   }
@@ -86,17 +117,24 @@ const searchRequests = async (req, res, next) => {
 const getRequestsByStatus = async (req, res, next) => {
   try {
     const { status } = req.params
-    const { page = 1, limit = 10 } = req.query
-    const requests = await orderService.getRequestsByStatus(status, Number(page), Number(limit))
+    const { page = 1, limit = 10, fields } = req.query
+    let fieldsArr
+    if (fields) {
+      fieldsArr = fields.split(',').map(f => f.trim())
+    }
+    const requests = await orderService.getRequestsByStatus(status, Number(page), Number(limit), fieldsArr)
     res.status(StatusCodes.OK).json({
       status: 'success',
+      statusParam: status,
+      page: Number(page),
+      limit: Number(limit),
+      fields: fieldsArr,
       requests
     })
   } catch (error) {
     next(error)
   }
 }
-
 
 export const orderController = {
   createRequest,

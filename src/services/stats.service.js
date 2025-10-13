@@ -12,7 +12,6 @@ const getDayRange = (date) => {
   return { start, end };
 };
 
-
 const createStats = async (date) => {
   const { start, end } = getDayRange(date)
   const exists = await StatsModel.findOne({
@@ -39,43 +38,79 @@ const createStats = async (date) => {
   return stats
 }
 
-const getStatsByDate = async (date) => {
+const getStatsByDate = async (date, fields = '') => {
   const { start, end } = getDayRange(date)
   const stats = await StatsModel.findOne({
     $or: [
       { createdAt: { $gte: start, $lte: end } },
       { updatedAt: { $gte: start, $lte: end } }
     ]
-  }).sort({ createdAt: -1 })
+  }).sort({ createdAt: -1 }).select(fields)
 
   if (!stats || stats.length === 0) {
     const res = await createStats(date)
-    return res.data
+    return {
+      _id: res._id,
+      visits: res.visits,
+      total_profit: res.total_profit,
+      total_orders: res.total_orders,
+      total_repairs: res.total_repairs,
+      total_products: res.total_products,
+      createdAt: res.createdAt,
+      updatedAt: res.updatedAt
+    }
   }
-  return stats
+  return {
+    _id: stats._id,
+    visits: stats.visits,
+    total_profit: stats.total_profit,
+    total_orders: stats.total_orders,
+    total_repairs: stats.total_repairs,
+    total_products: stats.total_products,
+    createdAt: stats.createdAt,
+    updatedAt: stats.updatedAt
+  }
 }
 
-const getAllStats = async (filter = {}) => {
-  const stats = await StatsModel.find(filter).sort({ createdAt: -1 }).limit(31)
+const getAllStats = async (filter = {}, fields = '') => {
+  const stats = await StatsModel.find(filter).sort({ createdAt: -1 }).limit(31).select(fields)
   if (!stats || stats.length === 0) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'No stats found')
   }
-  return stats
+  return stats.map(stat => ({
+    _id: stat._id,
+    visits: stat.visits,
+    total_profit: stat.total_profit,
+    total_orders: stat.total_orders,
+    total_repairs: stat.total_repairs,
+    total_products: stat.total_products,
+    createdAt: stat.createdAt,
+    updatedAt: stat.updatedAt
+  }))
 }
 
-const getStatsByMonth = async (month, year) => {
+const getStatsByMonth = async (month, year, fields = '') => {
   const start = moment.utc(`${year}-${month}-01`, 'YYYY-MM-DD').startOf('day').toDate();
-  const end = moment(start).endOf('month').endOf('day').toDate(); // ← auto biết tháng có 31 ngày hay 30
+  const end = moment(start).endOf('month').endOf('day').toDate();
   const stats = await StatsModel.find({
     $or: [
       { createdAt: { $gte: start, $lte: end } },
       { updatedAt: { $gte: start, $lte: end } }
     ]
-  }).sort({ createdAt: -1 })
+  }).sort({ createdAt: -1 }).select(fields)
   if (!stats || stats.length === 0) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'No stats found for this month')
   }
-  return stats
+  return stats.map(stat => ({
+    _id: stat._id,
+    visits: stat.visits,
+    total_profit: stat.total_profit,
+    total_orders: stat.total_orders,
+    total_repairs: stat.total_repairs,
+    total_products: stat.total_products,
+    createdAt: stat.createdAt,
+    updatedAt: stat.updatedAt
+  }))
 }
 
 const updateStats = async (reqBody, date) => {

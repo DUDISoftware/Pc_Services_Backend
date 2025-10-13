@@ -2,6 +2,12 @@ import { StatusCodes } from 'http-status-codes'
 import { productService } from '~/services/product.service'
 import { searchService } from '~/services/search.service.js'
 
+// Helper to parse fields from query
+const parseFields = (fields) => {
+  if (!fields) return undefined
+  return fields.split(',').map(f => f.trim())
+}
+
 const createProduct = async (req, res, next) => {
   try {
     const files = req.files
@@ -25,8 +31,9 @@ const createProduct = async (req, res, next) => {
 const getRelatedProducts = async (req, res, next) => {
   try {
     const { id } = req.params
-    const { limit = 4 } = req.query
-    const products = await productService.getRelatedProducts(id, Number(limit))
+    const { limit = 4, fields } = req.query
+    const selectFields = parseFields(fields)
+    const products = await productService.getRelatedProducts(id, Number(limit), selectFields)
     res.status(StatusCodes.OK).json({ status: 'success', products })
   } catch (error) {
     next(error)
@@ -36,7 +43,9 @@ const getRelatedProducts = async (req, res, next) => {
 const getQuantity = async (req, res, next) => {
   try {
     const { id } = req.params
-    const quantity = await productService.getQuantity(id)
+    const { fields } = req.query
+    const selectFields = parseFields(fields)
+    const quantity = await productService.getQuantity(id, selectFields)
     res.status(StatusCodes.OK).json({ status: 'success', quantity: quantity })
   } catch (error) {
     next(error)
@@ -90,8 +99,9 @@ const updateStatus = async (req, res, next) => {
 
 const getFeaturedProducts = async (req, res, next) => {
   try {
-    const { limit = 8 } = req.query
-    const products = await productService.getFeaturedProducts(Number(limit))
+    const { limit = 8, fields } = req.query
+    const selectFields = parseFields(fields)
+    const products = await productService.getFeaturedProducts(Number(limit), selectFields)
     res.status(StatusCodes.OK).json({ status: 'success', products })
   } catch (error) {
     next(error)
@@ -100,8 +110,10 @@ const getFeaturedProducts = async (req, res, next) => {
 
 const getAllProducts = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10 } = req.query
-    const data = await productService.getAllProducts(Number(page), Number(limit))
+    const { page = 1, limit = 10, fields, filter } = req.query
+    const selectFields = parseFields(fields)
+    const filters = filter ? JSON.parse(filter) : undefined
+    const data = await productService.getAllProducts(Number(page), Number(limit), filters, selectFields)
     res.status(StatusCodes.OK).json(data)
   } catch (error) {
     next(error)
@@ -111,7 +123,9 @@ const getAllProducts = async (req, res, next) => {
 const getProductById = async (req, res, next) => {
   try {
     const { id } = req.params
-    const product = await productService.getProductById(id)
+    const { fields } = req.query
+    const selectFields = parseFields(fields)
+    const product = await productService.getProductById(id, selectFields)
     res.status(StatusCodes.OK).json({ status: 'success', product })
   } catch (error) {
     next(error)
@@ -121,8 +135,10 @@ const getProductById = async (req, res, next) => {
 const getProductsByCategory = async (req, res, next) => {
   try {
     const { categoryId } = req.params
-    const { page = 1, limit = 10 } = req.query
-    const data = await productService.getProductsByCategory(categoryId, Number(page), Number(limit))
+    const { page = 1, limit = 10, fields, filter } = req.query
+    const selectFields = parseFields(fields)
+    const filters = filter ? JSON.parse(filter) : undefined
+    const data = await productService.getProductsByCategory(categoryId, Number(page), Number(limit), filters, selectFields)
     res.status(StatusCodes.OK).json(data)
   } catch (error) {
     next(error)
@@ -132,7 +148,9 @@ const getProductsByCategory = async (req, res, next) => {
 const getProductBySlug = async (req, res, next) => {
   try {
     const { slug } = req.params
-    const product = await productService.getProductBySlug(slug)
+    const { fields } = req.query
+    const selectFields = parseFields(fields)
+    const product = await productService.getProductBySlug(slug, selectFields)
     res.status(StatusCodes.OK).json({ status: 'success', product })
   } catch (error) {
     next(error)
@@ -141,20 +159,32 @@ const getProductBySlug = async (req, res, next) => {
 
 const searchProducts = async (req, res, next) => {
   try {
-    const { query, page = 1, limit = 10 } = req.query
-    if (!query || query.trim() === '') {
+    const { query, page = 1, limit = 10, fields, filter } = req.query
+    if (typeof query !== 'string' || query.trim() === '') {
       return res.status(StatusCodes.BAD_REQUEST).json({
         status: 'fail',
-        message: 'Query parameter is required'
+        message: 'Query parameter is required and must be a string'
       })
     }
-    const products = await searchService.searchProducts(query, Number(page), Number(limit))
+    const selectFields = parseFields(fields)
+    let filters
+    if (filter) {
+      try {
+        filters = JSON.parse(filter)
+      } catch (err) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          status: 'fail',
+          message: 'Filter parameter is not valid JSON'
+        })
+      }
+    }
+    const results = await searchService.searchProducts(query, Number(page), Number(limit), filters, selectFields)
     res.status(StatusCodes.OK).json({
       status: 'success',
       page: Number(page),
       limit: Number(limit),
-      results: products.length,
-      products
+      total: results.total,
+      products: results
     })
   } catch (error) {
     next(error)
@@ -164,7 +194,9 @@ const searchProducts = async (req, res, next) => {
 const getProductViews = async (req, res, next) => {
   try {
     const { id } = req.params
-    const views = await productService.getProductViews(id)
+    const { fields } = req.query
+    const selectFields = parseFields(fields)
+    const views = await productService.getProductViews(id, selectFields)
     res.status(StatusCodes.OK).json({ status: 'success', views })
   } catch (error) {
     next(error)
@@ -174,14 +206,15 @@ const getProductViews = async (req, res, next) => {
 const countViewRedis = async (req, res, next) => {
   try {
     const { id } = req.params
-    const views = await productService.countViewRedis(id)
+    const { fields } = req.query
+    const selectFields = parseFields(fields)
+    const views = await productService.countViewRedis(id, selectFields)
     res.status(StatusCodes.OK).json({ status: 'success', views })
   } catch (error) {
     next(error)
   }
 }
 
-// You should implement deleteProduct if you want to export it
 const deleteProduct = async (req, res, next) => {
   try {
     const { id } = req.params

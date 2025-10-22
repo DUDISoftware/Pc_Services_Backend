@@ -213,7 +213,7 @@ const updateProduct = async (id, reqBody, files) => {
   if (files?.length) {
     updateData.images = files.map(file => ({
       url: file.path,
-      public_id: file.filename
+      public_id: file.filename  
     }))
   }
   const updated = await ProductModel.findByIdAndUpdate(id, updateData, { new: true })

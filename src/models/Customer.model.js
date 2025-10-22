@@ -1,3 +1,4 @@
+
 import mongoose from 'mongoose'
 
 const schemaOptions = {
@@ -37,3 +38,4 @@ CustomerSchema.index({ name: 'text', email: 'text', phone: 'text' })
 const Customer = mongoose.model('Customer', CustomerSchema)
 
 export default Customer
+

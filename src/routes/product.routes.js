@@ -48,6 +48,7 @@ Router.patch(
 
 // GET APIs
 Router.get('/', productController.getAllProducts) // ?page=1&limit=10
+Router.get('/export', productController.exportProductsToExcel)
 Router.get('/featured', productController.getFeaturedProducts)
 Router.get('/export', productController.exportProductsToExcel)
 Router.get('/search', productController.searchProducts) // ?query=abc&page=1&limit=10

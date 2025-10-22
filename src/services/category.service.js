@@ -4,7 +4,9 @@ import CategoryModel from '~/models/Category.model'
 import ProductModel from '~/models/Product.model'
 
 /**
- * Create category
+ * Creates a new category in the database.
+ * @param {Object} reqBody - The data for the new category.
+ * @returns {Promise<Object>} The created category document.
  */
 const createCategory = async (reqBody) => {
   try {
@@ -16,7 +18,12 @@ const createCategory = async (reqBody) => {
 }
 
 /**
- * Get all categories with pagination
+ * Retrieves all categories with pagination and optional filtering.
+ * @param {number} page - The page number.
+ * @param {number} limit - Number of categories per page.
+ * @param {Object} filter - Filter conditions.
+ * @param {string} fields - Fields to select.
+ * @returns {Promise<Object>} Paginated categories and metadata.
  */
 const getCategories = async (page = 1, limit = 10, filter = {}, fields) => {
   try {
@@ -45,7 +52,10 @@ const getCategories = async (page = 1, limit = 10, filter = {}, fields) => {
 }
 
 /**
- * Get category by id
+ * Retrieves a category by its unique ID.
+ * @param {string} id - The category ID.
+ * @param {string} fields - Fields to select.
+ * @returns {Promise<Object>} The category document.
  */
 const getCategoryById = async (id, fields) => {
   try {
@@ -60,7 +70,10 @@ const getCategoryById = async (id, fields) => {
 }
 
 /**
- * Get category by slug
+ * Retrieves a category by its slug.
+ * @param {string} slug - The category slug.
+ * @param {string} fields - Fields to select.
+ * @returns {Promise<Object>} The category document.
  */
 const getCategoryBySlug = async (slug, fields) => {
   try {
@@ -75,7 +88,10 @@ const getCategoryBySlug = async (slug, fields) => {
 }
 
 /**
- * Update category
+ * Updates an existing category by its ID.
+ * @param {string} id - The category ID.
+ * @param {Object} reqBody - The updated data.
+ * @returns {Promise<Object>} The updated category document.
  */
 const updateCategory = async (id, reqBody) => {
   try {
@@ -91,7 +107,9 @@ const updateCategory = async (id, reqBody) => {
 }
 
 /**
- * Delete category and detach products
+ * Deletes a category by its ID and detaches it from products.
+ * @param {string} id - The category ID.
+ * @returns {Promise<Object>} The deleted category document.
  */
 const deleteCategory = async (id) => {
   try {

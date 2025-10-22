@@ -3,16 +3,38 @@ import { StatusCodes } from 'http-status-codes'
 import ApiError from '~/utils/ApiError.js'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
-// Validation rules
+/**
+ * Joi schema để validate param :id theo định dạng ObjectId hợp lệ.
+ */
 const idValidationRule = Joi.object({
   id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required()
 })
 
+/**
+ * Joi schema validate param :status (trạng thái của yêu cầu sửa chữa).
+ * Hợp lệ: `new`, `in_progress`, `completed`, `cancelled`.
+ */
 const statusValidationRule = Joi.object({
   status: Joi.string().valid('new', 'in_progress', 'completed', 'cancelled').required()
 })
 
-// Middlewares
+/**
+ * Middleware validate body khi tạo mới yêu cầu sửa chữa (Repair Request).
+ *
+ * ✅ Validate các trường:
+ * - `service_id` (ObjectId hợp lệ)
+ * - `name`, `phone`, `address`, `repair_type`, `problem_description` (bắt buộc)
+ * - `status` có giá trị mặc định là `'new'`
+ * - `images` là mảng chứa các object có `url` & `public_id`
+ *
+ * Nếu hợp lệ: gán `req.body = validatedData`
+ * Nếu không hợp lệ: ném `ApiError(422, message)`
+ *
+ * @param {import('express').Request} req Express Request
+ * @param {import('express').Response} res Express Response
+ * @param {import('express').NextFunction} next Express Next Function
+ * @throws {ApiError} Nếu dữ liệu không hợp lệ
+ */
 const createRepair = async (req, res, next) => {
   const createRepairRule = Joi.object({
     service_id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
@@ -32,6 +54,7 @@ const createRepair = async (req, res, next) => {
       })
     ).optional()
   })
+
   try {
     const data = req.body || {}
     const validatedData = await createRepairRule.validateAsync(data, { abortEarly: false })
@@ -42,6 +65,19 @@ const createRepair = async (req, res, next) => {
   }
 }
 
+/**
+ * Middleware validate param :id và body khi cập nhật yêu cầu sửa chữa.
+ *
+ * ✅ Validate:
+ * - `id` (ObjectId hợp lệ, bắt buộc)
+ * - Các trường khác là tùy chọn, cho phép cập nhật một phần
+ * - `images` có thể chứa danh sách URL và public_id mới
+ *
+ * @param {import('express').Request} req Express Request
+ * @param {import('express').Response} res Express Response
+ * @param {import('express').NextFunction} next Express Next Function
+ * @throws {ApiError} Nếu dữ liệu hoặc param không hợp lệ
+ */
 const updateRepair = async (req, res, next) => {
   const updateRepairRule = Joi.object({
     id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),
@@ -61,6 +97,7 @@ const updateRepair = async (req, res, next) => {
       })
     ).optional()
   })
+
   try {
     const payload = req.body || {}
     const params = req.params || {}
@@ -75,6 +112,14 @@ const updateRepair = async (req, res, next) => {
   }
 }
 
+/**
+ * Middleware validate param :id cho API ẩn yêu cầu sửa chữa (hidden = true).
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @throws {ApiError} Nếu :id không hợp lệ
+ */
 const hideRepair = async (req, res, next) => {
   try {
     const params = req.params || {}
@@ -86,6 +131,14 @@ const hideRepair = async (req, res, next) => {
   }
 }
 
+/**
+ * Middleware validate param :id cho API xóa yêu cầu sửa chữa.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @throws {ApiError} Nếu :id không hợp lệ
+ */
 const deleteRepair = async (req, res, next) => {
   try {
     const params = req.params || {}
@@ -97,6 +150,14 @@ const deleteRepair = async (req, res, next) => {
   }
 }
 
+/**
+ * Middleware validate param :id cho API lấy thông tin chi tiết yêu cầu sửa chữa.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @throws {ApiError} Nếu :id không hợp lệ
+ */
 const getRepairById = async (req, res, next) => {
   try {
     const params = req.params || {}
@@ -108,6 +169,14 @@ const getRepairById = async (req, res, next) => {
   }
 }
 
+/**
+ * Middleware validate param :id cho API lấy danh sách yêu cầu sửa chữa theo service.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @throws {ApiError} Nếu :id không hợp lệ
+ */
 const getRepairsByService = async (req, res, next) => {
   try {
     const params = req.params || {}
@@ -119,6 +188,16 @@ const getRepairsByService = async (req, res, next) => {
   }
 }
 
+/**
+ * Middleware validate param :status cho API lấy danh sách yêu cầu sửa chữa theo trạng thái.
+ *
+ * ✅ Hợp lệ: `new`, `in_progress`, `completed`, `cancelled`
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @throws {ApiError} Nếu :status không hợp lệ
+ */
 const getRepairsByStatus = async (req, res, next) => {
   try {
     const params = req.params || {}
@@ -130,6 +209,18 @@ const getRepairsByStatus = async (req, res, next) => {
   }
 }
 
+/**
+ * Bộ middleware validate cho module Repair Request.
+ *
+ * Bao gồm:
+ * - `createRepair`: validate dữ liệu tạo mới yêu cầu
+ * - `updateRepair`: validate cập nhật
+ * - `hideRepair`: validate param khi ẩn yêu cầu
+ * - `deleteRepair`: validate param khi xóa
+ * - `getRepairById`: validate param khi lấy chi tiết
+ * - `getRepairsByService`: validate param khi lấy theo service
+ * - `getRepairsByStatus`: validate param khi lấy theo trạng thái
+ */
 export const repairValidation = {
   createRepair,
   updateRepair,

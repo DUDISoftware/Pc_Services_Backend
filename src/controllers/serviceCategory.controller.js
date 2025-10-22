@@ -3,6 +3,16 @@ import { StatusCodes } from 'http-status-codes'
 import { serviceCategoryService } from '~/services/serviceCategory.service.js'
 import { searchServiceCategories as searchService } from '~/services/search.service.js'
 
+/**
+ * Controller: Tạo danh mục dịch vụ mới.
+ *
+ * ✅ Body: thông tin danh mục (vd: name, description, status, slug, ...)
+ * ✅ Response: 201 Created → { status, message, category }
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const createCategory = async (req, res, next) => {
   try {
     const category = await serviceCategoryService.createCategory(req.body)
@@ -16,6 +26,17 @@ const createCategory = async (req, res, next) => {
   }
 }
 
+/**
+ * Controller: Cập nhật danh mục dịch vụ theo ID.
+ *
+ * ✅ Route: PUT /service-categories/:id
+ * ✅ Body: các trường cần cập nhật
+ * ✅ Response: 200 OK → { status, message, category }
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const updateCategory = async (req, res, next) => {
   try {
     const category = await serviceCategoryService.updateCategory(
@@ -32,14 +53,25 @@ const updateCategory = async (req, res, next) => {
   }
 }
 
-// Modified: getAllCategories now supports fields and filter
+/**
+ * Controller: Lấy tất cả danh mục dịch vụ (hỗ trợ chọn field và filter JSON).
+ *
+ * ✅ Query:
+ * - fields: "name,slug,..." (tùy chọn)
+ * - filter: JSON string, ví dụ {"status":"active"} (tùy chọn)
+ *
+ * ✅ Response: 200 OK → { status, categories }
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const getAllCategories = async (req, res, next) => {
   try {
     const { fields, filter } = req.query
-    
-    // Parse fields as array if provided
+
     const selectFields = fields ? fields.split(',') : undefined
-    // Parse filter as JSON if provided
+
     let filterObj = undefined
     if (filter) {
       try {
@@ -51,6 +83,7 @@ const getAllCategories = async (req, res, next) => {
         })
       }
     }
+
     const categories = await serviceCategoryService.getAllCategories(filterObj, selectFields)
     res.status(StatusCodes.OK).json({ status: 'success', categories })
   } catch (error) {
@@ -58,7 +91,17 @@ const getAllCategories = async (req, res, next) => {
   }
 }
 
-// Modified: getCategoryById supports fields
+/**
+ * Controller: Lấy chi tiết danh mục theo ID (hỗ trợ chọn field).
+ *
+ * ✅ Route: GET /service-categories/:id
+ * ✅ Query: fields (tùy chọn)
+ * ✅ Response: 200 OK → { status, category }
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const getCategoryById = async (req, res, next) => {
   try {
     const { fields } = req.query
@@ -70,7 +113,17 @@ const getCategoryById = async (req, res, next) => {
   }
 }
 
-// Modified: getCategoryBySlug supports fields
+/**
+ * Controller: Lấy chi tiết danh mục theo slug (hỗ trợ chọn field).
+ *
+ * ✅ Route: GET /service-categories/slug/:slug
+ * ✅ Query: fields (tùy chọn)
+ * ✅ Response: 200 OK → { status, category }
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const getCategoryBySlug = async (req, res, next) => {
   try {
     const { fields } = req.query
@@ -82,6 +135,16 @@ const getCategoryBySlug = async (req, res, next) => {
   }
 }
 
+/**
+ * Controller: Xóa danh mục dịch vụ theo ID.
+ *
+ * ✅ Route: DELETE /service-categories/:id
+ * ✅ Response: 200 OK → { status, message }
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const deleteCategory = async (req, res, next) => {
   try {
     await serviceCategoryService.deleteCategory(req.params.id)
@@ -94,7 +157,22 @@ const deleteCategory = async (req, res, next) => {
   }
 }
 
-// Modified: searchCategories supports fields and filter as JSON
+/**
+ * Controller: Tìm kiếm danh mục dịch vụ (hỗ trợ fields & filter JSON).
+ *
+ * ✅ Route: GET /service-categories/search
+ * ✅ Query:
+ * - query (bắt buộc), page (mặc định 1), limit (mặc định 10)
+ * - fields: "name,slug"
+ * - filter: JSON string
+ *
+ * ✅ Response: 200 OK → { status, results }
+ * ❌ 400 Bad Request nếu query rỗng hoặc filter sai định dạng.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ */
 const searchCategories = async (req, res, next) => {
   try {
     let { query, page = 1, limit = 10, fields, filter } = req.query
@@ -107,6 +185,7 @@ const searchCategories = async (req, res, next) => {
     }
 
     const selectFields = fields ? fields.split(',') : undefined
+
     let filterObj = undefined
     if (filter) {
       try {
@@ -119,7 +198,6 @@ const searchCategories = async (req, res, next) => {
       }
     }
 
-    // Pass filterObj and selectFields directly, not as an object
     const results = await searchService(query, page, limit, filterObj, selectFields)
     res.status(StatusCodes.OK).json({
       status: 'success',
@@ -130,6 +208,18 @@ const searchCategories = async (req, res, next) => {
   }
 }
 
+/**
+ * Bộ controller cho module Service Category.
+ *
+ * Bao gồm:
+ * - createCategory: tạo danh mục
+ * - updateCategory: cập nhật danh mục theo ID
+ * - getAllCategories: lấy danh sách (lọc/fields)
+ * - getCategoryById: lấy theo ID (fields)
+ * - getCategoryBySlug: lấy theo slug (fields)
+ * - deleteCategory: xóa theo ID
+ * - searchCategories: tìm kiếm (fields, filter JSON)
+ */
 export const serviceCategoryController = {
   createCategory,
   updateCategory,

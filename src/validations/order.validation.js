@@ -20,7 +20,18 @@ const statusValidationRule = Joi.object({
   status: Joi.string().valid('new', 'in_progress', 'completed', 'cancelled').required()
 })
 
-// Middleware Validators
+
+/**
+ * Middleware to validate and sanitize the request data for creating a new order.
+ * Ensures that the provided order fields conform to the expected schema using Joi.
+ * On validation failure, passes an ApiError to the next middleware.
+ *
+ * @async
+ * @function createOrder
+ * @param {import('express').Request} req - Express request object containing order creation data.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 const createOrder = async (req, res, next) => {
   const createOrderRule = Joi.object({
     items: Joi.array().items(productValidationRule).min(1).required(),
@@ -42,6 +53,18 @@ const createOrder = async (req, res, next) => {
   }
 }
 
+
+/**
+ * Middleware to validate and sanitize the request data for updating an order.
+ * Ensures that the provided order fields conform to the expected schema using Joi.
+ * On validation failure, passes an ApiError to the next middleware.
+ *
+ * @async
+ * @function updateOrder
+ * @param {import('express').Request} req - Express request object containing order update data.
+ * @param {import('express').Response} res - Express response object.
+ * @param {import('express').NextFunction} next - Express next middleware function.
+ */
 const updateOrder = async (req, res, next) => {
   const updateOrderRule = Joi.object({
     id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required(),

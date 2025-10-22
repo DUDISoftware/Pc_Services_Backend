@@ -22,12 +22,24 @@ const discountSchema = new mongoose.Schema({
     required: false
   },
 
+  product_category_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'categories',
+    required: false
+  },
+
+  service_category_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'service_categories',
+    required: false
+  },
+
   type: {
     type: String,
-    enum: ['product', 'service'],
+    enum: ['product', 'service', 'product_category', 'service_category'],
     required: true,
     trim: true,
-    maxlength: 10
+    maxlength: 20
   },
 
   sale_off: {

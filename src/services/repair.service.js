@@ -3,6 +3,15 @@ import { StatusCodes } from 'http-status-codes'
 import Repair from '~/models/RepairRequest.model.js'
 import { deleteImage } from '~/utils/cloudinary.js'
 
+/**
+ * Creates a new repair request with the provided request body and optional image files.
+ * Images are saved with their path and filename.
+ *
+ * @param {Object} reqBody - The request body containing repair request details.
+ * @param {Array<Object>} [files] - Optional array of image file objects, each containing 'path' and 'filename'.
+ * @returns {Promise<Object>} The newly created repair request object.
+ * @throws {ApiError} If an internal server error occurs.
+ */
 const createRequest = async (reqBody, files) => {
   try {
     const images = files?.map(file => ({
@@ -22,6 +31,17 @@ const createRequest = async (reqBody, files) => {
   }
 }
 
+/**
+ * Updates a repair request by its ID with the provided request body and optional image files.
+ * If image files are provided, their paths and filenames are added to the request's images.
+ * Updates the 'updatedAt' timestamp to the current time.
+ *
+ * @param {string} id - The ID of the repair request to update.
+ * @param {Object} reqBody - The request body containing fields to update.
+ * @param {Array<Object>} [files] - Optional array of image file objects, each containing 'path' and 'filename'.
+ * @returns {Promise<Object>} The updated repair request object.
+ * @throws {ApiError} If the request is not found or an internal server error occurs.
+ */
 const updateRequest = async (id, reqBody, files) => {
   try {
     const updateData = {
@@ -44,6 +64,13 @@ const updateRequest = async (id, reqBody, files) => {
   }
 }
 
+/**
+ * Hides a repair request by setting its 'hidden' property to true and updating the 'updatedAt' timestamp.
+ *
+ * @param {string} id - The ID of the repair request to hide.
+ * @returns {Promise<Object>} The updated repair request object.
+ * @throws {ApiError} If the request is not found or an internal server error occurs.
+ */
 const hideRequest = async (id) => {
   try {
     const updated = await Repair.findByIdAndUpdate(
@@ -58,7 +85,17 @@ const hideRequest = async (id) => {
   }
 }
 
-// Added .select() to specify fields for all get methods
+/**
+ * Retrieves all repair requests with pagination, filtering, and field selection.
+ * Populates the 'service_id' field with service name and price.
+ *
+ * @param {number} [page=1] - The page number for pagination.
+ * @param {number} [limit=10] - The number of requests per page.
+ * @param {Object} [filter={}] - Optional filter criteria.
+ * @param {string} [fields=''] - Optional fields to select.
+ * @returns {Promise<Array<Object>>} Array of repair request objects.
+ * @throws {ApiError} If an internal server error occurs.
+ */
 const getAllRequests = async (page = 1, limit = 10, filter = {}, fields = '') => {
   try {
     const skip = (page - 1) * limit
@@ -73,6 +110,14 @@ const getAllRequests = async (page = 1, limit = 10, filter = {}, fields = '') =>
   }
 }
 
+/**
+ * Retrieves a repair request by its ID with optional field selection.
+ *
+ * @param {string} id - The ID of the repair request to retrieve.
+ * @param {string} [fields=''] - Optional fields to select.
+ * @returns {Promise<Object>} The repair request object.
+ * @throws {ApiError} If an internal server error occurs.
+ */
 const getRequestById = async (id, fields = '') => {
   try {
     return await Repair.findById(id).select(fields)
@@ -81,6 +126,13 @@ const getRequestById = async (id, fields = '') => {
   }
 }
 
+/**
+ * Deletes a repair request by its ID and removes associated images from cloud storage.
+ *
+ * @param {string} id - The ID of the repair request to delete.
+ * @returns {Promise<Object>} The deleted repair request object.
+ * @throws {ApiError} If the request is not found or an internal server error occurs.
+ */
 const deleteRequest = async (id) => {
   try {
     const result = await Repair.findByIdAndDelete(id)

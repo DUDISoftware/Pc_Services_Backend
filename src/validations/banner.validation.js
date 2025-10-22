@@ -8,7 +8,18 @@ const idValidationRule = Joi.object({
   id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
 })
 
-// Create Banner Validation
+// Update Banner Validation
+/**
+ * Middleware to validate and sanitize request body for creating a banner.
+ * Validates banner fields such as title, description, link, position, layout, size, and image using Joi.
+ * If validation fails, passes an ApiError to the next middleware.
+ *
+ * @async
+ * @function createBanner
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @param {import('express').NextFunction} next - Express next middleware function
+ */
 const createBanner = async (req, res, next) => {
   const createBannerRule = Joi.object({
     title: Joi.string().max(200).required(),
@@ -29,7 +40,17 @@ const createBanner = async (req, res, next) => {
   }
 }
 
-// Update Banner Validation
+/**
+ * Middleware to validate and sanitize request parameters and body for updating a banner.
+ * Validates banner fields such as title, description, link, position, layout, and size using Joi.
+ * If validation fails, passes an ApiError to the next middleware.
+ *
+ * @async
+ * @function updateBanner
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @param {import('express').NextFunction} next - Express next middleware function
+ */
 const updateBanner = async (req, res, next) => {
   const updateBannerRule = Joi.object({
     title: Joi.string().optional(),
@@ -49,7 +70,17 @@ const updateBanner = async (req, res, next) => {
   }
 }
 
-// Delete Banner Validation
+/**
+ * Middleware to validate and sanitize request parameters for deleting a banner.
+ * Validates the banner id using Joi.
+ * If validation fails, passes an ApiError to the next middleware.
+ *
+ * @async
+ * @function deleteBanner
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @param {import('express').NextFunction} next - Express next middleware function
+ */
 const deleteBanner = async (req, res, next) => {
   try {
     req.params = await idValidationRule.validateAsync(req.params || {}, { abortEarly: false })

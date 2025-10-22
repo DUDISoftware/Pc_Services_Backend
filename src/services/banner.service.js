@@ -3,7 +3,14 @@ import { StatusCodes } from 'http-status-codes'
 import BannerModel from '~/models/Banner.model.js'
 import { deleteImage } from '~/utils/cloudinary.js'
 
-// Determine banner size based on layout and position
+/**
+ * Determines the banner size based on layout and position.
+ * Returns 'large' or 'small' depending on the layout and position values.
+ *
+ * @param {number} layout - The layout type of the banner.
+ * @param {number} position - The position of the banner.
+ * @returns {string} The size of the banner ('large' or 'small').
+ */
 const getSizeByLayout = (layout, position) => {
   switch (Number(layout)) {
   case 1:
@@ -17,14 +24,33 @@ const getSizeByLayout = (layout, position) => {
   }
 }
 
-const getAllBanners = async () => {
+/**
+ * Retrieves all banners with pagination.
+ * Returns a list of banners sorted by last update time.
+ *
+ * @param {number} [limit=10] - Number of banners per page.
+ * @param {number} [page=1] - Page number to retrieve.
+ * @returns {Promise<Array>} Array of banner objects.
+ * @throws {ApiError} If an internal server error occurs.
+ */
+const getAllBanners = async (limit = 10, page = 1) => {
   try {
-    return await BannerModel.find().sort({ createdAt: -1 }).lean()
+    const skip = (page - 1) * limit
+    return await BannerModel.find().sort({ updatedAt: -1 }).skip(skip).limit(limit).lean()
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message)
   }
 }
 
+/**
+ * Creates a new banner with provided data and image file.
+ * Sets banner size based on layout and position.
+ *
+ * @param {Object} reqBody - The request body containing banner data.
+ * @param {Object} file - File object containing image data.
+ * @returns {Promise<Object>} The created banner object.
+ * @throws {ApiError} If an internal server error occurs.
+ */
 const createBanner = async (reqBody, file) => {
   try {
     const { layout, position } = reqBody
@@ -43,6 +69,17 @@ const createBanner = async (reqBody, file) => {
   }
 }
 
+/**
+ * Updates a banner by its ID with new data and optionally a new image.
+ * Handles image replacement and updates banner size based on layout and position.
+ * Throws an error if the banner is not found or if an internal error occurs.
+ *
+ * @param {string} id - The ID of the banner to update.
+ * @param {Object} reqBody - The request body containing banner data.
+ * @param {Object} [file] - Optional file object containing image data.
+ * @returns {Promise<Object>} The updated banner object.
+ * @throws {ApiError} If the banner is not found or an internal server error occurs.
+ */
 const updateBanner = async (id, reqBody, file) => {
   try {
     const { layout, position } = reqBody
@@ -76,6 +113,14 @@ const updateBanner = async (id, reqBody, file) => {
   }
 }
 
+/**
+ * Deletes a banner by its ID and removes its image from cloud storage.
+ * Throws an error if the banner is not found or if an internal error occurs.
+ *
+ * @param {string} id - The ID of the banner to delete.
+ * @returns {Promise<Object>} The deleted banner object.
+ * @throws {ApiError} If the banner is not found or an internal server error occurs.
+ */
 const deleteBanner = async (id) => {
   try {
     const deletedBanner = await BannerModel.findByIdAndDelete(id)

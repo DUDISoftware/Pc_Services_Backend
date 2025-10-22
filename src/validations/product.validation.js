@@ -3,18 +3,38 @@ import { StatusCodes } from 'http-status-codes'
 import ApiError from '~/utils/ApiError.js'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
+/**
+ * Schema validate param :id theo ObjectId.
+ */
 const idValidationRule = Joi.object({
   id: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required()
 })
 
+/**
+ * Schema validate param :slug (tối đa 200 ký tự, trim).
+ */
 const slugValidationRule = Joi.object({
   slug: Joi.string().max(200).trim().required()
 })
 
+/**
+ * Schema validate param :categoryId theo ObjectId.
+ */
 const categoryIdValidationRule = Joi.object({
   categoryId: Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE).required()
 })
 
+/**
+ * Validate body tạo mới product.
+ *
+ * Trường bắt buộc: name, price, quantity, category_id, brand, slug.
+ * Nếu hợp lệ sẽ gán `req.body = validatedData` và gọi `next()`.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @throws {ApiError} 422 nếu dữ liệu không hợp lệ
+ */
 const createProduct = async (req, res, next) => {
   const createProductRule = Joi.object({
     name: Joi.string().required().max(200).trim(),
@@ -44,6 +64,17 @@ const createProduct = async (req, res, next) => {
   }
 }
 
+/**
+ * Validate param :id và body cập nhật product.
+ *
+ * Yêu cầu giống createProduct; thêm validate :id.
+ * Nếu hợp lệ sẽ gán `req.params` và `req.body` đã được chuẩn hóa.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @throws {ApiError} 422 nếu dữ liệu/param không hợp lệ
+ */
 const updateProduct = async (req, res, next) => {
   const updateProductRule = Joi.object({
     name: Joi.string().required().max(200).trim(),
@@ -76,6 +107,16 @@ const updateProduct = async (req, res, next) => {
   }
 }
 
+/**
+ * Validate param :id và body cập nhật số lượng.
+ *
+ * Trường bắt buộc: quantity >= 0.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @throws {ApiError} 422 nếu không hợp lệ
+ */
 const updateQuantity = async (req, res, next) => {
   const updateQuantityRule = Joi.object({
     quantity: Joi.number().required().min(0)
@@ -93,6 +134,16 @@ const updateQuantity = async (req, res, next) => {
   }
 }
 
+/**
+ * Validate param :id và body cập nhật trạng thái sản phẩm.
+ *
+ * Hợp lệ một trong: 'available' | 'out_of_stock' | 'hidden'.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @throws {ApiError} 422 nếu không hợp lệ
+ */
 const updateStatus = async (req, res, next) => {
   const updateStatusRule = Joi.object({
     status: Joi.string().valid('available', 'out_of_stock', 'hidden').required()
@@ -110,6 +161,14 @@ const updateStatus = async (req, res, next) => {
   }
 }
 
+/**
+ * Validate param :id cho thao tác xóa product.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @throws {ApiError} 422 nếu :id không hợp lệ
+ */
 const deleteProduct = async (req, res, next) => {
   try {
     const params = req?.params ? req.params : {}
@@ -121,7 +180,14 @@ const deleteProduct = async (req, res, next) => {
   }
 }
 
-// ✅ thêm validate cho GET by ID
+/**
+ * Validate param :id cho API GET /products/:id.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @throws {ApiError} 422 nếu :id không hợp lệ
+ */
 const getProductById = async (req, res, next) => {
   try {
     const params = req?.params ? req.params : {}
@@ -133,7 +199,14 @@ const getProductById = async (req, res, next) => {
   }
 }
 
-// ✅ thêm validate cho GET by category
+/**
+ * Validate param :categoryId cho API GET /products/category/:categoryId.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @throws {ApiError} 422 nếu :categoryId không hợp lệ
+ */
 const getProductsByCategory = async (req, res, next) => {
   try {
     const params = req?.params ? req.params : {}
@@ -145,6 +218,14 @@ const getProductsByCategory = async (req, res, next) => {
   }
 }
 
+/**
+ * Validate param :slug cho API GET /products/slug/:slug.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @throws {ApiError} 422 nếu :slug không hợp lệ
+ */
 const getProductBySlug = async (req, res, next) => {
   try {
     const params = req?.params ? req.params : {}
@@ -156,6 +237,14 @@ const getProductBySlug = async (req, res, next) => {
   }
 }
 
+/**
+ * Validate param :id cho API GET số lượng tồn kho.
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {import('express').NextFunction} next
+ * @throws {ApiError} 422 nếu :id không hợp lệ
+ */
 const getQuantity = async (req, res, next) => {
   try {
     const params = req?.params ? req.params : {}
@@ -167,6 +256,9 @@ const getQuantity = async (req, res, next) => {
   }
 }
 
+/**
+ * Bộ middleware validate cho module Product.
+ */
 export const productValidation = {
   createProduct,
   updateProduct,

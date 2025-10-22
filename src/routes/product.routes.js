@@ -42,8 +42,6 @@ Router.patch(
 
 Router.patch(
   '/:id/status',
-  verifyToken,
-  verifyAdmin,
   productValidation.updateStatus,
   productController.updateStatus
 )
@@ -52,6 +50,7 @@ Router.patch(
 Router.get('/', productController.getAllProducts) // ?page=1&limit=10
 Router.get('/export', productController.exportProductsToExcel)
 Router.get('/featured', productController.getFeaturedProducts)
+Router.get('/export', productController.exportProductsToExcel)
 Router.get('/search', productController.searchProducts) // ?query=abc&page=1&limit=10
 Router.get('/slug/:slug', productValidation.getProductBySlug, productController.getProductBySlug)
 Router.get('/category/:categoryId', productValidation.getProductsByCategory, productController.getProductsByCategory)
